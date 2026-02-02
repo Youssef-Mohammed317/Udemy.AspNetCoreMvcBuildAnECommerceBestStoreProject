@@ -1,0 +1,174 @@
+﻿
+@model List<CategoryViewModel>
+
+@{
+    ViewData["Title"] = "Categories";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0" id="pageTitle">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-tags" viewBox="0 0 16 16">
+            <path d="M3 2v4.586l7 7L14.586 9l-7-7zM2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586z" />
+            <path d="M5.5 5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m0 1a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M1 7.086a1 1 0 0 0 .293.707L8.75 15.25l-.043.043a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 0 7.586V3a1 1 0 0 1 1-1z" />
+        </svg> Categories
+    </h2>
+    <a class="btn btn-success" asp-controller="Category" asp-action="Create" id="addCategoryBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle me-2" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+        </svg>Add New Category
+    </a>
+</div>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="card" id="noCategoriesCard">
+        <div class="card-body text-center py-5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-tags display-1 text-muted mb-3" viewBox="0 0 16 16" id="noCategoriesIcon">
+                <path d="M3 2v4.586l7 7L14.586 9l-7-7zM2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586z" />
+                <path d="M5.5 5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m0 1a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3M1 7.086a1 1 0 0 0 .293.707L8.75 15.25l-.043.043a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 0 7.586V3a1 1 0 0 1 1-1z" />
+            </svg>
+            <h4 class="text-muted" id="noCategoriesText">No categories found</h4>
+            <a asp-action="Create" asp-controller="Category" class="btn btn-primary mt-3" id="createFirstCategoryBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle me-2" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                </svg>Create Your First Category
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Categories Table -->
+    <div class="card shadow-sm" id="categoriesTableCard">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="categoriesTable" aria-describedby="categoriesTableDescription">
+                    <caption id="categoriesTableDescription" class="visually-hidden">List of categories with ID, Name, Creation Date, Last Update Date and Actions</caption>
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 60px;">ID</th>
+                            <th>Name</th>
+                            <th>Created At</th>
+                            <th>Last Updated At</th>
+                            <th style="width: 120px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var category in Model)
+                        {
+                            <tr id="categoryRow-@category.Id">
+                                <td class="fw-semibold" id="categoryId-@category.Id">#@category.Id</td>
+                                <td id="categoryName-@category.Id">
+                                     @category.Name
+                                </td>
+                                <td class="text-muted" id="categoryCreatedAt-@category.Id">@category.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td class="text-muted" id="categoryLastUpdatedAt-@category.Id">@category.LastUpdatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td class="align-content-center" id="categoryActions-@category.Id">
+                                    <div class="btn-group" aria-label="Category Actions">
+                                        <a class="btn btn-outline-primary btn-sm rounded-1"
+                                           asp-controller="Category"
+                                           asp-action="Edit"
+                                           asp-route-id="@category.Id"
+                                           title="Edit"
+                                           id="editCategoryBtn-@category.Id">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                                                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325" />
+                                            </svg>
+                                        </a>
+                                        <form asp-controller="Category"
+                                              asp-action="Delete"
+                                              asp-route-id="@category.Id"
+                                              method="post"
+                                              class="d-inline ms-1 rounded-1"
+                                              onsubmit="return confirm('Are you sure you want to delete this category?')"
+                                              id="deleteCategoryForm-@category.Id">
+
+                                            <button type="submit"
+                                                    class="btn btn-outline-danger btn-sm"
+                                                    title="Delete"
+                                                    id="deleteCategoryBtn-@category.Id">
+
+                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                     width="16" height="16"
+                                                     fill="currentColor"
+                                                     class="bi bi-trash"
+                                                     viewBox="0 0 16 16">
+                                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                                                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1z" />
+                                                </svg>
+
+                                            </button>
+                                        </form>
+
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        // Tooltip initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
+        // Focus management for screen readers
+        document.querySelectorAll('a, button').forEach(element => {
+            element.addEventListener('focus', function() {
+                this.setAttribute('aria-current', 'true');
+            });
+        });
+    </script>
+
+    <style>
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+            cursor: pointer;
+        }
+
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+        }
+
+        .badge {
+            font-size: 0.85em;
+            padding: 0.4em 0.8em;
+            font-weight: 500;
+        }
+
+        /* Focus styles for accessibility */
+        a:focus, button:focus, input:focus, select:focus {
+            outline: 2px solid #0d6efd;
+            outline-offset: 2px;
+        }
+
+        /* Skip to content link for screen readers */
+        .skip-to-content {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: #0d6efd;
+            color: white;
+            padding: 8px;
+            z-index: 100;
+        }
+
+            .skip-to-content:focus {
+                top: 0;
+            }
+    </style>
+
+    <!-- Skip to content link (hidden by default, visible on focus) -->
+    <a href="#categoriesTable" class="skip-to-content">Skip to categories table</a>
+}

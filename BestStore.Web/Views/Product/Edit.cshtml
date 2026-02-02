@@ -1,0 +1,166 @@
+﻿@model UpdateProductViewModel
+@{
+	ViewData["Title"] = "Edit Product";
+}
+
+<div class="row">
+	<div class="col-md-8 mx-auto rounded border p-3">
+		<h2 class="text-center mb-5">Edit Product</h2>
+
+		<form method="post" enctype="multipart/form-data" asp-action="Edit" asp-controller="Product">
+			<input type="hidden" asp-for="Id" />
+			<input type="hidden" asp-for="ImageUrl" />
+
+			<div class="row mb-3">
+				<label asp-for="Name" class="col-sm-4 col-form-label">Name</label>
+				<div class="col-sm-8">
+					<input class="form-control" asp-for="Name">
+					<span asp-validation-for="Name" class="text-danger"></span>
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label" asp-for="Brand">Brand</label>
+				<div class="col-sm-8">
+					<input class="form-control" asp-for="Brand">
+					<span asp-validation-for="Brand" class="text-danger"></span>
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label" asp-for="CategoryId">Category</label>
+				<div class="col-sm-8">
+					<select class="form-select" asp-for="CategoryId">
+						<option value="">-- Select Category --</option>
+						@foreach (var cat in Model.CategorySelectPairs)
+						{
+							<option value="@cat.CategoryId" selected="@(Model.CategoryId == cat.CategoryId)">@cat.Category</option>
+						}
+					</select>
+					<span asp-validation-for="CategoryId" class="text-danger"></span>
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label" asp-for="Price">Price</label>
+				<div class="col-sm-8">
+					<input class="form-control" asp-for="Price" type="number" step="0.01">
+					<span asp-validation-for="Price" class="text-danger"></span>
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label" asp-for="Description">Description</label>
+				<div class="col-sm-8">
+					<textarea class="form-control" asp-for="Description" rows="4"></textarea>
+					<span asp-validation-for="Description" class="text-danger"></span>
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label asp-for="StockQuantity" class="col-sm-4 col-form-label">Stock Quantity</label>
+				<div class="col-sm-8">
+
+					<input asp-for="StockQuantity" type="number" min="0" class="form-control" />
+					<span asp-validation-for="StockQuantity" class="text-danger"></span>
+					<small class="text-muted">Enter 0 for out of stock</small>
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label">Current Image</label>
+				<div class="col-sm-8">
+					<img id="currentImage" src="@Model.ImageUrl" width="150" alt="Current product image" class="img-thumbnail">
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label" asp-for="ImageFile">Upload New Image</label>
+				<div class="col-sm-8">
+					<input class="form-control" asp-for="ImageFile" accept="image/*" id="imageFileInput">
+					<span asp-validation-for="ImageFile" class="text-danger"></span>
+
+					<!-- Preview container for new image -->
+					<div id="imagePreviewContainer" class="mt-2" style="display: none;">
+						<p class="mb-1">New Image Preview:</p>
+						<img id="imagePreview" src="#" alt="Image preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+						<div class="mt-1">
+							<button type="button" onclick="clearImage()" class="btn btn-sm btn-outline-danger">
+								Clear Image
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label" asp-for="CreatedAt">Created At</label>
+				<div class="col-sm-8">
+					<input class="form-control-plaintext" readonly asp-for="CreatedAt">
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label" asp-for="LastUpdatedAt">Last Updated At</label>
+				<div class="col-sm-8">
+					<input class="form-control-plaintext" readonly asp-for="LastUpdatedAt">
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="offset-sm-4 col-sm-4 d-grid">
+					<button type="submit" class="btn btn-primary">Update Product</button>
+				</div>
+				<div class="col-sm-4 d-grid">
+					<a asp-controller="Product"
+					   asp-action="Index"
+					   class="btn btn-outline-primary">
+						Cancel
+					</a>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+@section Scripts {
+	<script>
+		// Image Preview Functionality Only
+		document.getElementById('imageFileInput').addEventListener('change', function(e) {
+			const file = e.target.files[0];
+			const preview = document.getElementById('imagePreview');
+			const previewContainer = document.getElementById('imagePreviewContainer');
+			const currentImage = document.getElementById('currentImage');
+
+			if (file) {
+				const reader = new FileReader();
+				reader.onload = function(e) {
+					previewContainer.style.display = 'block';
+					preview.src = e.target.result;
+					if (currentImage) {
+						currentImage.style.opacity = '0.3';
+					}
+				};
+				reader.readAsDataURL(file);
+			} else {
+				previewContainer.style.display = 'none';
+				if (currentImage) {
+					currentImage.style.opacity = '1';
+				}
+			}
+		});
+
+		// Clear Image
+		function clearImage() {
+			const imageInput = document.getElementById('imageFileInput');
+			const previewContainer = document.getElementById('imagePreviewContainer');
+			const currentImage = document.getElementById('currentImage');
+
+			imageInput.value = '';
+			previewContainer.style.display = 'none';
+			if (currentImage) {
+				currentImage.style.opacity = '1';
+			}
+		}
+	</script>
+}

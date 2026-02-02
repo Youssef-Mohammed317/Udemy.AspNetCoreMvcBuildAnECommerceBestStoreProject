@@ -1,0 +1,523 @@
+﻿@using BestStore.Application.DTOs.Product
+@model ProductListViewModel
+
+@{
+    ViewData["Title"] = "Products";
+
+    // Helper function for sorting arrows
+    HtmlString GetSortArrow(string column)
+    {
+        if (Model.SortBy != column) 
+            return new HtmlString("<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='currentColor' class='bi bi-arrow-up text-primary' viewBox='0 0 16 16'><path fill-rule='evenodd' d='M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5'/></svg>");
+
+        return Model.Ascending
+            ? new HtmlString("<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='currentColor' class='bi bi-arrow-down text-primary' viewBox='0 0 16 16'><path fill-rule='evenodd' d='M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1'/></svg>")
+            : new HtmlString("<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='currentColor' class='bi bi-arrow-up text-primary' viewBox='0 0 16 16'><path fill-rule='evenodd' d='M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5'/></svg>");
+    }
+    
+    // Helper function to generate sort URL
+    string GetSortUrl(string column)
+    {
+        var newAscending = Model.SortBy == column ? !Model.Ascending : true;
+        
+        var queryParams = new ProductQueryParams
+        {
+            Search = Model.Search,
+            CategoryId = Model.CategoryId,
+            SortBy = column,
+            Ascending = newAscending,
+            PageNumber = 1,
+            PageSize = Model.PaginatedProducts?.PageSize ?? 10
+        };
+        
+        return Url.Action("Index", queryParams)!;
+    }
+    
+    // Helper function for pagination URLs
+    string GetPageUrl(int pageNumber)
+    {
+        return Url.Action("Index", new ProductQueryParams
+        {
+            Search = Model.Search,
+            CategoryId = Model.CategoryId,
+            SortBy = Model.SortBy,
+            Ascending = Model.Ascending,
+            PageNumber = pageNumber,
+            PageSize = Model.PaginatedProducts?.PageSize ?? 10
+        })!;
+    }
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0" id="pageTitle">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-box-seam" viewBox="0 0 16 16">
+          <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2zm3.564 1.426L5.596 5 8 5.961 14.154 3.5zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/>
+        </svg>Products
+    </h2>
+    <a class="btn btn-success" asp-controller="Product" asp-action="Create" id="addProductBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle me-2" viewBox="0 0 16 16">
+          <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+        </svg>Add New Product
+    </a>
+</div>
+
+<!-- Search and Filter Card -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" asp-controller="Product" asp-action="Index" class="row g-3 align-items-end" id="searchFilterForm">
+            <input type="hidden" name="pageNumber" value="1" id="pageNumberInput" />
+            <input type="hidden" name="sortBy" value="@Model.SortBy" id="sortByInput" />
+            <input type="hidden" name="ascending" value="@Model.Ascending.ToString()" id="ascendingInput" />
+            
+            <div class="col-md-4">
+                <label class="form-label" for="searchInput" id="searchLabel">Search</label>
+                <div class="input-group">
+                    <span class="input-group-text" id="searchIcon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                        </svg>
+                    </span>
+                    <input class="form-control" 
+                           type="search" 
+                           name="search" 
+                           value="@Model.Search" 
+                           placeholder="Product name or brand"
+                           id="searchInput"
+                           aria-describedby="searchIcon">
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label" for="categorySelect" id="categoryLabel">Category</label>
+                <select class="form-select" 
+                        asp-for="CategoryId"
+                        name="categoryId"
+                        id="categorySelect"
+                        onchange="document.getElementById('searchFilterForm').submit()">
+                    <option value="">All Categories</option>
+                    @foreach (var cat in Model.CategorySelectPairs)
+                    {
+                        <option value="@cat.CategoryId" selected="@(Model.CategoryId == cat.CategoryId)">@cat.Category</option>
+                    }
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+    <div class="dropdown w-100">
+        <button class="btn btn-outline-secondary dropdown-toggle w-100"
+                type="button"
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="true"
+                aria-expanded="false">
+            Sort By @(Model.SortBy == "CreatedAt" ? "Date Created" : Model.SortBy)
+        </button>
+
+        <ul class="dropdown-menu animate__animated animate__fadeIn animate__faster"
+            style="animation-duration: 0.2s;">
+            <li><a class="dropdown-item transition-all" 
+                   href="@GetSortUrl("Id")"
+                   style="transition: all 0.15s ease-in-out;">ID</a></li>
+            <li><a class="dropdown-item transition-all" 
+                   href="@GetSortUrl("Name")"
+                   style="transition: all 0.15s ease-in-out;">Name</a></li>
+            <li><a class="dropdown-item transition-all" 
+                   href="@GetSortUrl("Price")"
+                   style="transition: all 0.15s ease-in-out;">Price</a></li>
+            <li><a class="dropdown-item transition-all" 
+                   href="@GetSortUrl("Brand")"
+                   style="transition: all 0.15s ease-in-out;">Brand</a></li>
+            <li><a class="dropdown-item transition-all" 
+                   href="@GetSortUrl("Category")"
+                   style="transition: all 0.15s ease-in-out;">Category</a></li>
+            <li><a class="dropdown-item transition-all" 
+                   href="@GetSortUrl("CreatedAt")"
+                   style="transition: all 0.15s ease-in-out;">Date Created</a></li>
+        </ul>
+    </div>
+</div>
+            
+            <div class="col-md-2">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" type="submit" id="applyFilterBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel me-1" viewBox="0 0 16 16">
+                          <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2z"/>
+                        </svg>Apply
+                    </button>
+                    @if (!string.IsNullOrEmpty(Model.Search) || Model.CategoryId != null)
+                    {
+                        <a href="@Url.Action("Index")" class="btn btn-outline-secondary" id="clearFilterBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle me-1" viewBox="0 0 16 16">
+                              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                              <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                            </svg>Clear
+                        </a>
+                    }
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.PaginatedProducts?.Items?.Any() != true)
+{
+    <div class="card" id="noProductsCard">
+        <div class="card-body text-center py-5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-inbox display-1 text-muted mb-3" viewBox="0 0 16 16" id="noProductsIcon">
+              <path d="M4.98 4a.5.5 0 0 0-.39.188L1.54 8H6a.5.5 0 0 1 .5.5 1.5 1.5 0 1 0 3 0A.5.5 0 0 1 10 8h4.46l-3.05-3.812A.5.5 0 0 0 11.02 4zm9.954 5H10.45a2.5 2.5 0 0 1-4.9 0H1.066l.32 2.562a.5.5 0 0 0 .497.438h12.234a.5.5 0 0 0 .496-.438zM3.809 3.563A1.5 1.5 0 0 1 4.981 3h6.038a1.5 1.5 0 0 1 1.172.563l3.7 4.625a.5.5 0 0 1 .105.374l-.39 3.124A1.5 1.5 0 0 1 14.117 13H1.883a1.5 1.5 0 0 1-1.489-1.314l-.39-3.124a.5.5 0 0 1 .106-.374z"/>
+            </svg>
+            <h4 class="text-muted" id="noProductsText">No products found</h4>
+            @if (!string.IsNullOrEmpty(Model.Search))
+            {
+                <p class="text-muted" id="searchResultText">No results for "<strong>@Model.Search</strong>"</p>
+            }
+            <a asp-action="Create" asp-controller="Product" class="btn btn-primary mt-3" id="createFirstProductBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle me-2" viewBox="0 0 16 16">
+                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                  <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                </svg>Create Your First Product
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Products Table -->
+    <div class="card shadow-sm" id="productsTableCard">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="productsTable" aria-describedby="productsTableDescription">
+                    <caption id="productsTableDescription" class="visually-hidden">List of products with ID, Name, Brand, Category, Price, Image, Creation Date and Actions</caption>
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 60px;">
+                                <a href="@GetSortUrl("Id")" class="text-decoration-none text-dark d-flex align-items-center" id="sortIdHeader">
+                                    <span>ID</span>
+                                    @GetSortArrow("Id")
+                                </a>
+                            </th>
+
+                            <th>
+                                <a href="@GetSortUrl("Name")" class="text-decoration-none text-dark d-flex align-items-center" id="sortNameHeader">
+                                    <span>Name</span>
+                                    @GetSortArrow("Name")
+                                </a>
+                            </th>
+
+                            <th>
+                                <a href="@GetSortUrl("Brand")" class="text-decoration-none text-dark d-flex align-items-center" id="sortBrandHeader">
+                                    <span>Brand</span>
+                                    @GetSortArrow("Brand")
+                                </a>
+                            </th>
+
+                            <th>
+                                <a href="@GetSortUrl("Category")" class="text-decoration-none text-dark d-flex align-items-center" id="sortCategoryHeader">
+                                    <span>Category</span>
+                                    @GetSortArrow("Category")
+                                </a>
+                            </th>
+
+                            <th>
+                                <a href="@GetSortUrl("Price")" class="text-decoration-none text-dark d-flex align-items-center" id="sortPriceHeader">
+                                    <span>Price</span>
+                                    @GetSortArrow("Price")
+                                </a>
+                            </th>
+
+                            <th style="width: 100px;">Image</th>
+
+                            <th>
+                                <a href="@GetSortUrl("CreatedAt")" class="text-decoration-none text-dark d-flex align-items-center" id="sortCreatedAtHeader">
+                                    <span>Created At</span>
+                                    @GetSortArrow("CreatedAt")
+                                </a>
+                            </th>
+                            <th style="width: 120px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model.PaginatedProducts.Items)
+                        {
+                            <tr id="productRow-@product.Id">
+                                <td class="fw-semibold" id="productId-@product.Id">#@product.Id</td>
+                                <td id="productName-@product.Id">@product.Name</td>
+                                <td id="productBrand-@product.Id">@product.Brand</td>
+                                <td id="productCategory-@product.Id">
+                                    <span class="badge bg-secondary">@product.Category</span>
+                                </td>
+                                <td class="fw-bold text-success" id="productPrice-@product.Id">$@product.Price.ToString("N2")</td>
+                                <td id="productImage-@product.Id">
+                                    @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                    {
+                                        <img src="@product.ImageUrl" 
+                                             width="60" 
+                                             height="60" 
+                                             class="rounded object-fit-cover border"
+                                             alt="@product.Name"
+                                             style="object-fit: cover;"
+                                             id="productImageImg-@product.Id">
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light rounded d-flex align-items-center justify-content-center"
+                                             style="width: 60px; height: 60px;"
+                                             id="productNoImage-@product.Id">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-image text-muted" viewBox="0 0 16 16">
+                                              <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+                                              <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1z"/>
+                                            </svg>
+                                        </div>
+                                    }
+                                </td>
+                                <td class="text-muted" id="productCreatedAt-@product.Id">@product.CreatedAt.ToString("yy-MM-dd")</td>
+                                <td class="align-content-center" id="productActions-@product.Id">
+                                    <div class="btn-group" aria-label="Product Actions">
+                                        <a class="btn btn-outline-primary btn-sm rounded-1" 
+                                           asp-controller="Product" 
+                                           asp-action="Edit" 
+                                           asp-route-id="@product.Id"
+                                           title="Edit"
+                                           id="editProductBtn-@product.Id">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                                            <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
+                                          </svg> 
+                                        </a>
+                                        <form asp-controller="Product"
+                                              asp-action="Delete"
+                                              asp-route-id="@product.Id"
+                                              method="post"
+                                              class="d-inline ms-1 rounded-1"
+                                              onsubmit="return confirm('Are you sure you want to delete this product?')"
+                                              id="deleteProductForm-@product.Id">
+
+                                            <button type="submit"
+                                                    class="btn btn-outline-danger btn-sm"
+                                                    title="Delete"
+                                                    id="deleteProductBtn-@product.Id">
+
+                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                     width="16" height="16"
+                                                     fill="currentColor"
+                                                     class="bi bi-trash"
+                                                     viewBox="0 0 16 16">
+                                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                                                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1z"/>
+                                                </svg>
+
+                                            </button>
+                                        </form>
+
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pagination and Info -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4" id="paginationContainer">
+        <!-- Page Info -->
+        <div class="mb-3 mb-md-0" id="pageInfo">
+            <p class="text-muted mb-0" id="pageInfoText">
+                Showing 
+                <strong>@((Model.PaginatedProducts.PageNumber - 1) * Model.PaginatedProducts.PageSize + 1)</strong>
+                to 
+                <strong>@Math.Min(Model.PaginatedProducts.PageNumber * Model.PaginatedProducts.PageSize, Model.PaginatedProducts.TotalCount)</strong>
+                of 
+                <strong>@Model.PaginatedProducts.TotalCount</strong>
+                products
+            </p>
+        </div>
+        
+        <!-- Pagination -->
+        <nav aria-label="Page navigation" id="paginationNav">
+            <ul class="pagination pagination-sm mb-0" id="paginationList">
+                <!-- Previous -->
+                <li class="page-item @(!Model.PaginatedProducts.HasPreviousPage ? "disabled" : "")">
+                    <a class="page-link" href="@GetPageUrl(Model.PaginatedProducts.PageNumber - 1)" id="prevPageLink" aria-label="Previous page">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-double-left" viewBox="0 0 16 16">
+                          <path fill-rule="evenodd" d="M8.354 1.646a.5.5 0 0 1 0 .708L2.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
+                          <path fill-rule="evenodd" d="M12.354 1.646a.5.5 0 0 1 0 .708L6.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
+                        </svg>
+                    </a>
+                </li>
+                
+                <!-- Page Numbers -->
+                @{
+                    int startPage = Math.Max(1, Model.PaginatedProducts.PageNumber - 2);
+                    int endPage = Math.Min(Model.PaginatedProducts.TotalPages, Model.PaginatedProducts.PageNumber + 2);
+                }
+                
+                @if (startPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@GetPageUrl(1)" id="firstPageLink">1</a>
+                    </li>
+                    @if (startPage > 2)
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link" id="ellipsisStart">...</span>
+                        </li>
+                    }
+                }
+                
+                @for (int i = startPage; i <= endPage; i++)
+                {
+                    <li class="page-item @(i == Model.PaginatedProducts.PageNumber ? "active" : "")">
+                        <a class="page-link" href="@GetPageUrl(i)" id="pageLink-@i">@i</a>
+                    </li>
+                }
+                
+                @if (endPage < Model.PaginatedProducts.TotalPages)
+                {
+                    @if (endPage < Model.PaginatedProducts.TotalPages - 1)
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link" id="ellipsisEnd">...</span>
+                        </li>
+                    }
+                    <li class="page-item">
+                        <a class="page-link" href="@GetPageUrl(Model.PaginatedProducts.TotalPages)" id="lastPageLink">
+                            @Model.PaginatedProducts.TotalPages
+                        </a>
+                    </li>
+                }
+                
+                <!-- Next -->
+                <li class="page-item @(!Model.PaginatedProducts.HasNextPage ? "disabled" : "")">
+                    <a class="page-link" href="@GetPageUrl(Model.PaginatedProducts.PageNumber + 1)" id="nextPageLink" aria-label="Next page">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-double-right" viewBox="0 0 16 16">
+                          <path fill-rule="evenodd" d="M3.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L9.293 8 3.646 2.354a.5.5 0 0 1 0-.708"/>
+                          <path fill-rule="evenodd" d="M7.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L13.293 8 7.646 2.354a.5.5 0 0 1 0-.708"/>
+                        </svg>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <!-- Page Size Selector -->
+        <div class="mt-3 mt-md-0" id="pageSizeSelector">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text" id="pageSizeIcon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                    </svg>
+                </span>
+                <select class="form-select" 
+                        onchange="location = this.value;" 
+                        style="width: auto;"
+                        id="pageSizeSelect"
+                        aria-describedby="pageSizeIcon">
+                    @{
+                        int currentPageSize = Model.PaginatedProducts.PageSize;
+                    }
+                    @foreach (var size in new[] { 5, 10, 20, 50 })
+                    {     
+                            <option value="@Url.Action("Index",  new ProductQueryParams { 
+                                    PageNumber = 1, 
+                                    PageSize = size,
+                                    Search = Model.Search,
+                                    CategoryId = Model.CategoryId,
+                                    SortBy = Model.SortBy,
+                                    Ascending = Model.Ascending
+                                })"
+                                selected="@(currentPageSize == size)"
+                                id="pageSizeOption-@size">
+                                @size
+                            </option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        // Auto-submit search after typing stops
+        let searchTimeout;
+        document.getElementById('searchInput')?.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                document.getElementById('pageNumberInput').value = 1;
+                document.getElementById('searchFilterForm').submit();
+            }, 2000);
+        });
+
+        // Tooltip initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
+        // Accessibility improvements
+        document.getElementById('searchInput')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('searchFilterForm').submit();
+            }
+        });
+
+        // Focus management for screen readers
+        document.querySelectorAll('.page-link').forEach(link => {
+            link.addEventListener('focus', function() {
+                this.setAttribute('aria-current', 'page');
+            });
+        });
+    </script>
+    
+    <style>
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+            cursor: pointer;
+        }
+        
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .object-fit-cover {
+            object-fit: cover;
+        }
+        
+        .page-item.active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        .badge {
+            font-size: 0.75em;
+            padding: 0.35em 0.65em;
+        }
+
+        /* Focus styles for accessibility */
+        a:focus, button:focus, input:focus, select:focus {
+            outline: 2px solid #0d6efd;
+            outline-offset: 2px;
+        }
+
+        /* Skip to content link for screen readers */
+        .skip-to-content {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: #0d6efd;
+            color: white;
+            padding: 8px;
+            z-index: 100;
+        }
+        .skip-to-content:focus {
+            top: 0;
+        }
+
+    </style>
+
+    <!-- Skip to content link (hidden by default, visible on focus) -->
+    <a href="#productsTable" class="skip-to-content">Skip to products table</a>
+}

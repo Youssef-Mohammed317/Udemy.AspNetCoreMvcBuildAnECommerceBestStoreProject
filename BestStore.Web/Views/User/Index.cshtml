@@ -1,0 +1,709 @@
+﻿@using BestStore.Web.Models.ViewModels.User
+@model UserListViewModel
+
+@{
+    ViewData["Title"] = "Users";
+
+    // Helper function for sorting arrows
+    HtmlString GetSortArrow(string column)
+    {
+        if (Model.SortBy != column) 
+            return new HtmlString("<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='currentColor' class='bi bi-arrow-up text-primary' viewBox='0 0 16 16'><path fill-rule='evenodd' d='M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5'/></svg>");
+
+        return Model.Ascending
+            ? new HtmlString("<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='currentColor' class='bi bi-arrow-down text-primary' viewBox='0 0 16 16'><path fill-rule='evenodd' d='M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1'/></svg>")
+            : new HtmlString("<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='currentColor' class='bi bi-arrow-up text-primary' viewBox='0 0 16 16'><path fill-rule='evenodd' d='M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5'/></svg>");
+    }
+    
+    // Helper function to generate sort URL
+    string GetSortUrl(string column)
+    {
+        var newAscending = Model.SortBy == column ? !Model.Ascending : true;
+        
+        var queryParams = new UserQueryParams
+        {
+            Search = Model.Search,
+            SortBy = column,
+            Ascending = newAscending,
+            PageNumber = 1,
+            PageSize = Model.PaginatedUsers?.PageSize ?? 10
+        };
+        
+        return Url.Action("Index", queryParams)!;
+    }
+    
+    // Helper function for pagination URLs
+    string GetPageUrl(int pageNumber)
+    {
+        return Url.Action("Index", new UserQueryParams
+        {
+            Search = Model.Search,
+            SortBy = Model.SortBy,
+            Ascending = Model.Ascending,
+            PageNumber = pageNumber,
+            PageSize = Model.PaginatedUsers?.PageSize ?? 10
+        })!;
+    }
+    
+    // Helper function to get role badge color
+    string GetRoleBadgeClass(string role)
+    {
+        return role.ToLower() switch
+        {
+            "admin" => "bg-danger",
+            "superadmin" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0" id="pageTitle">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16">
+          <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022ZM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.493 5.493 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"/>
+        </svg>Users
+    </h2>
+</div>
+
+<!-- Search and Filter Card -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end" id="searchFilterForm">
+            <input type="hidden" name="pageNumber" value="1" id="pageNumberInput" />
+            <input type="hidden" name="sortBy" value="@Model.SortBy" id="sortByInput" />
+            <input type="hidden" name="ascending" value="@Model.Ascending.ToString()" id="ascendingInput" />
+            
+            <div class="col-md-6">
+                <label class="form-label" for="searchInput" id="searchLabel">Search</label>
+                <div class="input-group">
+                    <span class="input-group-text" id="searchIcon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                        </svg>
+                    </span>
+                    <input class="form-control" 
+                           type="search" 
+                           name="search" 
+                           value="@Model.Search" 
+                           placeholder="Search by name, email, or phone"
+                           id="searchInput"
+                           aria-describedby="searchIcon">
+                </div>
+            </div>
+            
+           <div class="col-md-4">
+    <div class="dropdown w-100">
+        <button class="btn btn-outline-secondary dropdown-toggle w-100"
+                type="button"
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="true"
+                aria-expanded="false">
+            Sort By @(Model.SortBy switch
+            {
+                "FirstName" => "First Name",
+                "LastName" => "Last Name",
+                "CreatedAt" => "Date Created",
+                "LastUpdatedAt" => "Last Updated",
+                "EmailConfirmed" => "Email Status",
+                _ => Model.SortBy
+            })
+        </button>
+
+        <ul class="dropdown-menu animate__animated animate__fadeIn animate__faster"
+            style="animation-duration: 0.2s;">
+            <li><a class="dropdown-item transition-all" 
+                   href="@GetSortUrl("FirstName")"
+                   style="transition: all 0.15s ease-in-out;">First Name</a></li>
+            <li><a class="dropdown-item transition-all" 
+                   href="@GetSortUrl("LastName")"
+                   style="transition: all 0.15s ease-in-out;">Last Name</a></li>
+            <li><a class="dropdown-item transition-all" 
+                   href="@GetSortUrl("Email")"
+                   style="transition: all 0.15s ease-in-out;">Email</a></li>
+            <li><a class="dropdown-item transition-all" 
+                   href="@GetSortUrl("CreatedAt")"
+                   style="transition: all 0.15s ease-in-out;">Date Created</a></li>
+            <li><a class="dropdown-item transition-all" 
+                   href="@GetSortUrl("EmailConfirmed")"
+                   style="transition: all 0.15s ease-in-out;">Email Status</a></li>
+        </ul>
+    </div>
+</div>
+
+            
+            <div class="col-md-2">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" type="submit" id="applyFilterBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel me-1" viewBox="0 0 16 16">
+                          <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2z"/>
+                        </svg>Apply
+                    </button>
+                    @if (!string.IsNullOrEmpty(Model.Search))
+                    {
+                        <a href="@Url.Action("Index")" class="btn btn-outline-secondary" id="clearFilterBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle me-1" viewBox="0 0 16 16">
+                              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                              <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                            </svg>Clear
+                        </a>
+                    }
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.PaginatedUsers?.Items?.Any() != true)
+{
+    <div class="card" id="noUsersCard">
+        <div class="card-body text-center py-5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people display-1 text-muted mb-3" viewBox="0 0 16 16" id="noUsersIcon">
+              <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022ZM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.493 5.493 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"/>
+            </svg>
+            <h4 class="text-muted" id="noUsersText">No users found</h4>
+            @if (!string.IsNullOrEmpty(Model.Search))
+            {
+                <p class="text-muted" id="searchResultText">No results for "<strong>@Model.Search</strong>"</p>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <!-- Users Table -->
+    <div class="card shadow-sm" id="usersTableCard">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="usersTable" aria-describedby="usersTableDescription">
+                    <caption id="usersTableDescription" class="visually-hidden">List of users with Name, Email, Roles, Status, Creation Date, Last Update and Actions</caption>
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 80px;">
+                                <a href="@GetSortUrl("Id")" class="text-decoration-none text-dark d-flex align-items-center" id="sortIdHeader">
+                                    <span>ID</span>
+                                    @GetSortArrow("Id")
+                                </a>
+                            </th>
+                            <th>
+                                <a href="@GetSortUrl("name")" class="text-decoration-none text-dark d-flex align-items-center" id="sortFirstNameHeader">
+                                    <span>Name</span>
+                                    @GetSortArrow("name")
+                                </a>
+                            </th>
+                            <th>
+                                <a href="@GetSortUrl("Email")" class="text-decoration-none text-dark d-flex align-items-center" id="sortEmailHeader">
+                                    <span>Email</span>
+                                    @GetSortArrow("Email")
+                                </a>
+                            </th>
+                            <th>Roles</th>
+                            <th>
+                                <a href="@GetSortUrl("CreatedAt")" class="text-decoration-none text-dark d-flex align-items-center" id="sortCreatedAtHeader">
+                                    <span>Created</span>
+                                    @GetSortArrow("CreatedAt")
+                                </a>
+                            </th>
+                            <th>
+                                <a href="@GetSortUrl("EmailConfirmed")" class="text-decoration-none text-dark d-flex align-items-center" id="sortEmailStatusHeader">
+                                    <span>Status</span>
+                                    @GetSortArrow("EmailConfirmed")
+                                </a>
+                            </th>
+                            <th style="width: 160px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model.PaginatedUsers.Items)
+                        {
+                            <tr id="userRow-@user.Id">
+ 
+                                    <td class="fw-semibold text-muted" id="userId-@user.Id">
+                                        @(user.Id.Substring(0, 8))...
+                                    </td>
+                                
+                        
+                                <td id="userName-@user.Id">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" 
+                                             style="width: 40px; height: 40px; font-size: 14px;"
+                                             id="userAvatar-@user.Id">
+                                           @(
+                                (!string.IsNullOrEmpty(user.FirstName) ? user.FirstName[0].ToString() : "") +
+                                (!string.IsNullOrEmpty(user.LastName) ? user.LastName[0].ToString() : "")
+                            )
+                                                                    </div>
+                                        <div>
+                                            <div class="fw-semibold" id="userFullName-@user.Id">@user.FullName</div>
+                                            <small class="text-muted" id="userInitials-@user.Id">@user.FirstName @user.LastName</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td id="userEmail-@user.Id">
+                                    <div>@user.Email</div>
+                                    <small class="text-muted">User</small>
+                                </td>
+                                <td id="userRoles-@user.Id">
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @if (user.Roles != null && user.Roles.Any())
+                                        {
+                                            @foreach (var role in user.Roles)
+                                            {
+                                                <span class="badge @GetRoleBadgeClass(role)" id="userRoleBadge-@user.Id-@role">
+                                                    @role
+                                                </span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-muted" id="userNoRolesBadge-@user.Id">No roles</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="text-muted small" id="userCreatedAt-@user.Id">
+                                    <div>@user.CreatedAt</div>
+                                    <small class="text-muted">Created</small>
+                                </td>
+                                <td id="userStatus-@user.Id">
+
+                                        <div class="d-flex align-items-center gap-2">
+                                            @if (user.EmailConfirmed)
+                                            {
+                                                <span class="badge bg-success d-flex align-items-center" id="userStatusBadge-@user.Id">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-check-circle me-1" viewBox="0 0 16 16">
+                                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                                        <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05"/>
+                                                    </svg>
+                                                    Verified
+                                                </span>
+
+                                                <button type="button" class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#emailStatusModal-@user.Id" id="emailStatusBtn-@user.Id">
+                                                  Change Status
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning text-dark d-flex align-items-center" id="userStatusBadge-@user.Id">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-exclamation-triangle me-1" viewBox="0 0 16 16">
+                                                        <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.146.146 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.163.163 0 0 1-.054.06.116.116 0 0 1-.066.017H1.146a.115.115 0 0 1-.066-.017.163.163 0 0 1-.054-.06.176.176 0 0 1 .002-.183L7.884 2.073a.147.147 0 0 1 .054-.057m1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566z"/>
+                                                        <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+                                                    </svg>
+                                                    Pending
+                                                </span>
+
+                                                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#emailStatusModal-@user.Id" id="emailStatusBtn2-@user.Id">
+                                                    Change Status
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+
+                                <td class="align-content-center" id="userActions-@user.Id">
+                                    <div class="btn-group" aria-label="User Actions">
+                                        <a class="btn btn-outline-info btn-sm ms-1 rounded-1"
+                                           asp-controller="User"
+                                           asp-action="Details"
+                                           asp-route-id="@user.Id"
+                                           title="View Details"
+                                           id="viewUserBtn-@user.Id">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                              <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
+                                              <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
+                                            </svg>
+                                        </a>
+                                            <button type="button" 
+                                                 title="Manage Roles"
+                                                class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#manageRoleModal-@user.Id" id="manageRoleBtn-@user.Id">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shield-lock" viewBox="0 0 16 16">
+                                              <path d="M5.338 1.59a61 61 0 0 0-2.837.856.48.48 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.7 10.7 0 0 0 2.287 2.233c.346.244.652.42.893.533q.18.085.293.118a1 1 0 0 0 .101.025 1 1 0 0 0 .1-.025q.114-.034.294-.118c.24-.113.547-.29.893-.533a10.7 10.7 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.8 11.8 0 0 1-2.517 2.453 7 7 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7 7 0 0 1-1.048-.625 11.8 11.8 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 63 63 0 0 1 5.072.56"/>
+                                              <path d="M9.5 6.5a1.5 1.5 0 0 1-1 1.415l.385 1.99a.5.5 0 0 1-.491.595h-.788a.5.5 0 0 1-.49-.595l.384-1.99a1.5 1.5 0 1 1 2-1.415"/>
+                                            </svg>
+                                            
+                                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@user.Id" id="deleteUserBtn-@user.Id">
+                                                 <svg xmlns="http://www.w3.org/2000/svg"
+                                                     width="16" height="16"
+                                                     fill="currentColor"
+                                                     class="bi bi-trash"
+                                                      title="Delete User"
+                                                     viewBox="0 0 16 16">
+                                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                                                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1z"/>
+                                                </svg>
+                                            </button>
+         
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Manage Role Confirmation Modal -->
+                            <div class="modal fade" id="manageRoleModal-@user.Id" tabindex="-1"
+                                 aria-labelledby="manageRoleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="manageRoleModalLabel">
+                                                Confirm Role Change
+                                            </h5>
+                                            <button type="button" class="btn-close"
+                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+
+                                        <div class="modal-body">
+
+                                            <div class="alert alert-warning d-flex align-items-center" role="alert">
+                                                <i class="bi bi-shield-exclamation me-2 fs-5"></i>
+                                                <div>
+                                                    <strong>Warning:</strong> Changing user roles affects permissions immediately.
+                                                </div>
+                                            </div>
+
+                                            <p>
+                                                Are you sure you want to change the role for
+                                                <strong>@user.FullName</strong>?
+                                            </p>
+
+                                            <p class="text-muted small">
+                                                This action will update the user's access level across the system.
+                                            </p>
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <button type="button"
+                                                    class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">
+                                                Cancel
+                                            </button>
+
+                                            <a class="btn btn-outline-primary"
+                                                asp-controller="User"
+                                               asp-action="ManageRoles"
+                                               asp-route-id="@user.Id">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shield-lock" viewBox="0 0 16 16">
+                                                    <path d="M5.338 1.59a61 61 0 0 0-2.837.856.48.48 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.7 10.7 0 0 0 2.287 2.233c.346.244.652.42.893.533q.18.085.293.118a1 1 0 0 0 .101.025 1 1 0 0 0 .1-.025q.114-.034.294-.118c.24-.113.547-.29.893-.533a10.7 10.7 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.8 11.8 0 0 1-2.517 2.453 7 7 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7 7 0 0 1-1.048-.625 11.8 11.8 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 63 63 0 0 1 5.072.56" />
+                                                    <path d="M9.5 6.5a1.5 1.5 0 0 1-1 1.415l.385 1.99a.5.5 0 0 1-.491.595h-.788a.5.5 0 0 1-.49-.595l.384-1.99a1.5 1.5 0 1 1 2-1.415" />
+                                                </svg> Manage Roles
+                                            </a>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Delete Confirmation Modal -->
+                            <div class="modal fade" id="deleteModal-@user.Id" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="alert alert-warning" role="alert" id="deleteWarningAlert">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-exclamation-triangle-fill me-2" viewBox="0 0 16 16">
+                                                    <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2" />
+                                                </svg>
+                                                <strong>Warning:</strong> This action cannot be undone.
+                                            </div>
+                                            <p id="deleteConfirmationText">
+                                                Are you sure you want to delete the user <strong>@user.FullName</strong>?
+                                                This will permanently remove all user data from the system.
+                                            </p>
+                                            <p class="text-muted small" id="deleteNote">
+                                                Note: The user will no longer be able to access their account.
+                                            </p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelDeleteBtn">Cancel</button>
+                                            <form asp-controller="User" asp-action="Delete" asp-route-id="@user.Id" method="post" id="deleteUserForm">
+                                                <button type="submit" class="btn btn-danger" id="confirmDeleteBtn">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash me-2" viewBox="0 0 16 16">
+                                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                                                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1z" />
+                                                    </svg>Delete User
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Change Email Status Modal -->
+                            <div class="modal fade" id="emailStatusModal-@user.Id" tabindex="-1" aria-labelledby="emailStatusModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="emailStatusModalLabel">Change Email Status</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+
+                                            <div class="modal-body">
+                                                <div class="alert alert-warning d-flex align-items-center" role="alert">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-exclamation-triangle-fill me-2" viewBox="0 0 16 16">
+                                                        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2" />
+                                                    </svg>
+                                                    <strong>Warning:</strong> You are about to change the email status for this user.
+                                                </div>
+
+                                                <p id="emailStatusConfirmationText">
+                                                    Are you sure you want to <span id="emailStatusActionText">@((user.EmailConfirmed) ? "unverify" : "verify")</span> the email of user <strong>@user.FullName</strong>?
+                                                </p>
+                                                <p class="text-muted small">
+                                                    After changing the status, the user will see that their email is verified or unverified accordingly.
+                                                </p>
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelEmailStatusBtn">Cancel</button>
+
+                                                <form asp-controller="User" asp-action="ChangeEmailStatus" method="post" id="changeEmailStatusForm">
+                                                    <input type="hidden" name="id" value="@user.Id" />
+                                                    <button type="submit" class="btn btn-primary" id="confirmEmailStatusBtn">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square me-2" viewBox="0 0 16 16">
+                                                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706l-1.439 1.439-2.121-2.121L13.38.525a.5.5 0 0 1 .706 0l1.416 1.415z"/>
+                                                            <path fill-rule="evenodd" d="M1 13.5V16h2.5l9.354-9.354-2.121-2.121L1 13.5zm2 1V14H2v.5h1z"/>
+                                                        </svg>
+                                                        Confirm Change
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pagination and Info -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4" id="paginationContainer">
+        <!-- Page Info -->
+        <div class="mb-3 mb-md-0" id="pageInfo">
+            <p class="text-muted mb-0" id="pageInfoText">
+                Showing 
+                <strong>@((Model.PaginatedUsers.PageNumber - 1) * Model.PaginatedUsers.PageSize + 1)</strong>
+                to 
+                <strong>@Math.Min(Model.PaginatedUsers.PageNumber * Model.PaginatedUsers.PageSize, Model.PaginatedUsers.TotalCount)</strong>
+                of 
+                <strong>@Model.PaginatedUsers.TotalCount</strong>
+                users
+            </p>
+        </div>
+        
+       <!-- Pagination -->
+        <nav aria-label="Page navigation" id="paginationNav">
+            <ul class="pagination pagination-sm mb-0" id="paginationList">
+                <!-- Previous -->
+                <li class="page-item @(!Model.PaginatedUsers.HasPreviousPage ? "disabled" : "")">
+                    <a class="page-link" href="@GetPageUrl(Model.PaginatedUsers.PageNumber - 1)" id="prevPageLink" aria-label="Previous page">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-double-left" viewBox="0 0 16 16">
+                          <path fill-rule="evenodd" d="M8.354 1.646a.5.5 0 0 1 0 .708L2.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
+                          <path fill-rule="evenodd" d="M12.354 1.646a.5.5 0 0 1 0 .708L6.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
+                        </svg>
+                    </a>
+                </li>
+                
+                <!-- Page Numbers -->
+                @{
+                    int startPage = Math.Max(1, Model.PaginatedUsers.PageNumber - 2);
+                    int endPage = Math.Min(Model.PaginatedUsers.TotalPages, Model.PaginatedUsers.PageNumber + 2);
+                }
+                
+                @if (startPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@GetPageUrl(1)" id="firstPageLink">1</a>
+                    </li>
+                    @if (startPage > 2)
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link" id="ellipsisStart">...</span>
+                        </li>
+                    }
+                }
+                
+                @for (int i = startPage; i <= endPage; i++)
+                {
+                    <li class="page-item @(i == Model.PaginatedUsers.PageNumber ? "active" : "")">
+                        <a class="page-link" href="@GetPageUrl(i)" id="pageLink-@i">@i</a>
+                    </li>
+                }
+                
+                @if (endPage < Model.PaginatedUsers.TotalPages)
+                {
+                    @if (endPage < Model.PaginatedUsers.TotalPages - 1)
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link" id="ellipsisEnd">...</span>
+                        </li>
+                    }
+                    <li class="page-item">
+                        <a class="page-link" href="@GetPageUrl(Model.PaginatedUsers.TotalPages)" id="lastPageLink">
+                            @Model.PaginatedUsers.TotalPages
+                        </a>
+                    </li>
+                }
+                
+                <!-- Next -->
+                <li class="page-item @(!Model.PaginatedUsers.HasNextPage ? "disabled" : "")">
+                    <a class="page-link" href="@GetPageUrl(Model.PaginatedUsers.PageNumber + 1)" id="nextPageLink" aria-label="Next page">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-double-right" viewBox="0 0 16 16">
+                          <path fill-rule="evenodd" d="M3.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L9.293 8 3.646 2.354a.5.5 0 0 1 0-.708"/>
+                          <path fill-rule="evenodd" d="M7.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L13.293 8 7.646 2.354a.5.5 0 0 1 0-.708"/>
+                        </svg>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <!-- Page Size Selector -->
+        <div class="mt-3 mt-md-0" id="pageSizeSelector">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text" id="pageSizeIcon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                    </svg>
+                </span>
+                <select class="form-select" 
+                        onchange="location = this.value;" 
+                        style="width: auto;"
+                        id="pageSizeSelect"
+                        aria-describedby="pageSizeIcon">
+                    @{
+                        int currentPageSize = Model.PaginatedUsers.PageSize;
+                    }
+                    @foreach (var size in new[] { 5, 10, 20, 50 })
+                    {     
+                            <option value="@Url.Action("Index",  new UserQueryParams { 
+                                    PageNumber = 1, 
+                                    PageSize = size,
+                                    Search = Model.Search,
+                                    SortBy = Model.SortBy,
+                                    Ascending = Model.Ascending
+                                })"
+                                selected="@(currentPageSize == size)"
+                                id="pageSizeOption-@size">
+                                @size
+                            </option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+
+}
+
+
+@section Scripts {
+    <script>
+        // Auto-submit search after typing stops
+        let searchTimeout;
+        document.getElementById('searchInput')?.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                document.getElementById('pageNumberInput').value = 1;
+                document.getElementById('searchFilterForm').submit();
+            }, 2000);
+        });
+
+        // Tooltip initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
+        // Accessibility improvements
+        document.getElementById('searchInput')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('searchFilterForm').submit();
+            }
+        });
+
+        // Focus management for screen readers
+        document.querySelectorAll('.page-link').forEach(link => {
+            link.addEventListener('focus', function() {
+                this.setAttribute('aria-current', 'page');
+            });
+        });
+         // var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+         // var manageRoleModal = new bootstrap.Modal(document.getElementById('manageRoleModal'));
+         // var manageRoleModal = new bootstrap.Modal(document.getElementById('emailStatusModel'));
+        
+    </script>
+    
+    <style>
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+            cursor: pointer;
+        }
+        
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .object-fit-cover {
+            object-fit: cover;
+        }
+        
+        .page-item.active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        .badge {
+            font-size: 0.75em;
+            padding: 0.35em 0.65em;
+        }
+
+        /* Role badge specific styles */
+        .badge.bg-danger { background-color: #dc3545 !important; }
+        .badge.bg-warning { background-color: #ffc107 !important; color: #000 !important; }
+        .badge.bg-info { background-color: #0dcaf0 !important; }
+        .badge.bg-secondary { background-color: #6c757d !important; }
+
+        /* Focus styles for accessibility */
+        a:focus, button:focus, input:focus, select:focus {
+            outline: 2px solid #0d6efd;
+            outline-offset: 2px;
+        }
+
+        /* Skip to content link for screen readers */
+        .skip-to-content {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: #0d6efd;
+            color: white;
+            padding: 8px;
+            z-index: 100;
+        }
+        .skip-to-content:focus {
+            top: 0;
+        }
+
+        /* Avatar styling */
+        .rounded-circle {
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        /* Table cell alignment */
+        td {
+            vertical-align: middle;
+        }
+
+        /* Role badges container */
+        .d-flex.gap-1 {
+            gap: 4px;
+        }
+
+</style>
+
+    <!-- Skip to content link (hidden by default, visible on focus) -->
+    <a href="#usersTable" class="skip-to-content">Skip to users table</a>
+}

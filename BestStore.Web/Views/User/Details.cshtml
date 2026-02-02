@@ -1,0 +1,582 @@
+﻿@using BestStore.Web.Models.ViewModels.User
+@model UserDetailsViewModel
+
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<div class="container">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb" id="breadcrumbNav">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-controller="User" asp-action="Index" id="backToUsersLink">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left me-1" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
+                            </svg>Users
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page" id="currentPageBreadcrumb">Details</li>
+                </ol>
+            </nav>
+            <h2 class="mb-0" id="pageTitle">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-badge me-2" viewBox="0 0 16 16">
+                    <path d="M6.5 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1zM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+                    <path d="M4.5 0A2.5 2.5 0 0 0 2 2.5V14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2.5A2.5 2.5 0 0 0 11.5 0zM3 2.5A1.5 1.5 0 0 1 4.5 1h7A1.5 1.5 0 0 1 13 2.5v10.795a4.2 4.2 0 0 0-.776-.492C11.392 12.387 10.063 12 8 12s-3.392.387-4.224.803a4.2 4.2 0 0 0-.776.492z" />
+                </svg>User Details
+            </h2>
+        </div>
+        <div class="btn-group" aria-label="User Actions" id="userActionButtons">
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#manageRoleModal" id="manageRoleBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shield-lock" viewBox="0 0 16 16">
+                    <path d="M5.338 1.59a61 61 0 0 0-2.837.856.48.48 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.7 10.7 0 0 0 2.287 2.233c.346.244.652.42.893.533q.18.085.293.118a1 1 0 0 0 .101.025 1 1 0 0 0 .1-.025q.114-.034.294-.118c.24-.113.547-.29.893-.533a10.7 10.7 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.8 11.8 0 0 1-2.517 2.453 7 7 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7 7 0 0 1-1.048-.625 11.8 11.8 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 63 63 0 0 1 5.072.56" />
+                    <path d="M9.5 6.5a1.5 1.5 0 0 1-1 1.415l.385 1.99a.5.5 0 0 1-.491.595h-.788a.5.5 0 0 1-.49-.595l.384-1.99a1.5 1.5 0 1 1 2-1.415" />
+                </svg> Manage Roles
+            </button>
+            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" id="deleteUserBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash me-2" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1z" />
+                </svg>Delete
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row">
+        <!-- Left Column: User Info -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4" id="userInfoCard">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0" id="userInfoTitle">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-person-circle me-2" viewBox="0 0 16 16">
+                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+                            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
+                        </svg>Personal Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Avatar -->
+                        <div class="col-md-4 text-center mb-4 mb-md-0" id="userAvatarSection">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3"
+                                 style="width: 120px; height: 120px; font-size: 48px;"
+                                 id="userAvatarLarge">
+                                @(
+                                                                (!string.IsNullOrEmpty(Model.FirstName) ? Model.FirstName[0].ToString() : "") +
+                                                                (!string.IsNullOrEmpty(Model.LastName) ? Model.LastName[0].ToString() : "")
+                                                                )
+                            </div>
+                            <div class="mt-3" id="userStatusSection">
+                                @if (Model.EmailConfirmed)
+                                {
+                                    <span class="badge bg-success fs-6" id="userStatusBadgeLarge">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle me-1" viewBox="0 0 16 16">
+                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                                            <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05" />
+                                        </svg>Verified Account
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark fs-6" id="userStatusBadgeLarge">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-triangle me-1" viewBox="0 0 16 16">
+                                            <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.146.146 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.163.163 0 0 1-.054.06.116.116 0 0 1-.066.017H1.146a.115.115 0 0 1-.066-.017.163.163 0 0 1-.054-.06.176.176 0 0 1 .002-.183L7.884 2.073a.147.147 0 0 1 .054-.057m1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566z" />
+                                            <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z" />
+                                        </svg>Email Pending Verification
+                                    </span>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- User Details -->
+                        <div class="col-md-8" id="userDetailsSection">
+                            <div class="row">
+                                <div class="col-md-6 mb-3" id="firstNameField">
+                                    <label class="form-label text-muted small mb-1" id="firstNameLabel">First Name</label>
+                                    <div class="fs-5 fw-semibold" id="firstNameValue">@Model.FirstName</div>
+                                </div>
+                                <div class="col-md-6 mb-3" id="lastNameField">
+                                    <label class="form-label text-muted small mb-1" id="lastNameLabel">Last Name</label>
+                                    <div class="fs-5 fw-semibold" id="lastNameValue">@Model.LastName</div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12 mb-3" id="emailField">
+                                    <label class="form-label text-muted small mb-1" id="emailLabel">Email Address</label>
+                                    <div class="d-flex align-items-center" id="emailValueContainer">
+                                        <div class="fs-5 fw-semibold me-2" id="emailValue">@Model.Email</div>
+                                        @if (Model.EmailConfirmed)
+                                        {
+                                            <span class="badge bg-success" id="emailVerifiedBadge">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                                                </svg> Verified
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3" id="phoneField">
+                                    <label class="form-label text-muted small mb-1" id="phoneLabel">Phone Number</label>
+                                    <div class="fs-5 fw-semibold" id="phoneValue">
+                                        @if (!string.IsNullOrEmpty(Model.PhoneNumber))
+                                        {
+                                            @Model.PhoneNumber
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fw-normal" id="phoneNotSet">Not set</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3" id="userIdField">
+                                    <label class="form-label text-muted small mb-1" id="userIdLabel">User ID</label>
+                                    <div class="fs-6 text-muted font-monospace" id="userIdValue">@Model.Id</div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12 mb-3" id="addressField">
+                                    <label class="form-label text-muted small mb-1" id="addressLabel">Address</label>
+                                    <div class="fs-5 fw-semibold" id="addressValue">
+                                        @if (!string.IsNullOrEmpty(Model.Address))
+                                        {
+                                            @Model.Address
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fw-normal" id="addressNotSet">Not set</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Roles Card -->
+            <div class="card shadow-sm mb-4" id="rolesCard">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0" id="rolesTitle">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-shield-check me-2" viewBox="0 0 16 16">
+                            <path d="M5.338 1.59a61 61 0 0 0-2.837.856.48.48 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.7 10.7 0 0 0 2.287 2.233c.346.244.652.42.893.533q.18.085.293.118a1 1 0 0 0 .101.025 1 1 0 0 0 .1-.025q.114-.034.294-.118c.24-.113.547-.29.893-.533a10.7 10.7 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.8 11.8 0 0 1-2.517 2.453 7 7 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7 7 0 0 1-1.048-.625 11.8 11.8 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 63 63 0 0 1 5.072.56" />
+                            <path d="M10.854 5.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0" />
+                        </svg>User Roles & Permissions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Roles != null && Model.Roles.Any())
+                    {
+                        <div class="d-flex flex-wrap gap-2 mb-3" id="rolesList">
+                            @foreach (var role in Model.Roles)
+                            {
+                                <span class="badge @GetRoleBadgeClass(role) fs-6 py-2 px-3" id="roleBadge-@role">
+                                    @if (role.ToLower() == "admin")
+                                    {
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-star-fill me-1" viewBox="0 0 16 16">
+                                            <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
+                                        </svg>
+                                    }
+                                    
+                                    @role
+                                </span>
+                            }
+                        </div>
+                        <p class="text-muted mb-0" id="rolesDescription">
+                            This user has @Model.Roles.Count role@(Model.Roles.Count != 1 ? "s" : "") assigned.
+                            Roles determine what actions and features the user can access in the system.
+                        </p>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4" id="noRolesSection">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-shield-slash text-muted mb-3" viewBox="0 0 16 16" id="noRolesIcon">
+                                <path d="M10.412 11.528A5 5 0 0 0 5.096 6.32l.7-1.43a6 6 0 0 1 6.792 7.98zm.362.354.026-.02a7 7 0 0 0-9.791-8.241l-.824-1.43a8 8 0 0 1 11.082 9.454zm-9.536.138a.5.5 0 0 1 .11.672L2.808 8.76l1.149 1.99a.5.5 0 1 1-.861.51L1.697 9.21 1.04 10.44a.5.5 0 0 1-.672.11L.146 10.177a.5.5 0 0 1-.11-.672l1.658-2.877L0 5.354l.5-.5 2.5 2.5.5.5z" />
+                                <path d="m14.975 6.721-1.428-2.257a8 8 0 0 0-9.755 2.563.5.5 0 1 0 .844.537 7 7 0 0 1 8.356-2.143l1.195 1.886a.5.5 0 1 0 .788-.612M4.5 6.5A.5.5 0 0 0 4 7v1.5H2.5a.5.5 0 0 0 0 1H4v1.5a.5.5 0 0 0 1 0V10h1.5a.5.5 0 0 0 0-1H5V7a.5.5 0 0 0-.5-.5" />
+                            </svg>
+                            <h5 class="text-muted" id="noRolesTitle">No Roles Assigned</h5>
+                            <p class="text-muted" id="noRolesText">
+                                This user doesn't have any roles assigned. They will have limited access to system features.
+                            </p>
+                            <a asp-controller="User" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary btn-sm" id="assignRolesBtn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shield-plus me-1" viewBox="0 0 16 16">
+                                    <path d="M5.338 1.59a61 61 0 0 0-2.837.856.48.48 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.7 10.7 0 0 0 2.287 2.233c.346.244.652.42.893.533q.18.085.293.118a1 1 0 0 0 .101.025 1 1 0 0 0 .1-.025q.114-.034.294-.118c.24-.113.547-.29.893-.533a10.7 10.7 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.8 11.8 0 0 1-2.517 2.453 7 7 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7 7 0 0 1-1.048-.625 11.8 11.8 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 63 63 0 0 1 5.072.56" />
+                                    <path d="M8 4.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V9a.5.5 0 0 1-1 0V7.5H6a.5.5 0 0 1 0-1h1.5V5a.5.5 0 0 1 .5-.5" />
+                                </svg>Assign Roles
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Account Info & Timeline -->
+        <div class="col-lg-4">
+            <!-- Account Information Card -->
+            <div class="card shadow-sm mb-4" id="accountInfoCard">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0" id="accountInfoTitle">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-clock-history me-2" viewBox="0 0 16 16">
+                            <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z" />
+                            <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z" />
+                            <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5" />
+                        </svg>Account Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush" id="accountInfoList">
+                        <div class="list-group-item px-0 py-3" id="createdAtItem">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted" id="createdAtLabel">Account Created</small>
+                                    <div class="fw-semibold" id="createdAtValue">@Model.CreatedAt</div>
+                                </div>
+                                <div class="text-success" id="createdAtIcon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-calendar-plus" viewBox="0 0 16 16">
+                                        <path d="M8 7a.5.5 0 0 1 .5.5V9H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V10H6a.5.5 0 0 1 0-1h1.5V7.5A.5.5 0 0 1 8 7" />
+                                        <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="list-group-item px-0 py-3" id="lastUpdatedItem">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted" id="lastUpdatedLabel">Last Updated</small>
+                                    <div class="fw-semibold" id="lastUpdatedValue">@Model.LastUpdatedAt</div>
+                                </div>
+                                <div class="text-primary" id="lastUpdatedIcon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-calendar-check" viewBox="0 0 16 16">
+                                        <path d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0" />
+                                        <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="list-group-item px-0 py-3" id="accountStatusItem">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted" id="accountStatusLabel">Account Status</small>
+                                    <div class="fw-semibold" id="accountStatusValue">
+                                        @if (Model.EmailConfirmed)
+                                        {
+                                            <span class="text-success">Active & Verified</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-warning">Pending Verification</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="@(Model.EmailConfirmed ? "text-success" : "text-warning")" id="accountStatusIcon">
+                                    @if (Model.EmailConfirmed)
+                                    {
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                                        </svg>
+                                    }
+                                    else
+                                    {
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
+                                            <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z" />
+                                            <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z" />
+                                            <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5" />
+                                        </svg>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions Card -->
+            <div class="card shadow-sm" id="quickActionsCard">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0" id="quickActionsTitle">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-lightning-charge me-2" viewBox="0 0 16 16">
+                            <path d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09zM4.157 8.5H7a.5.5 0 0 1 .478.647L6.11 13.59l5.732-6.09H9a.5.5 0 0 1-.478-.647L9.89 2.41z" />
+                        </svg>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2" id="quickActionsList">
+                        @if (!Model.EmailConfirmed)
+                        {
+                            <form asp-action="SendEmailVerfication" asp-controller="Account" method="post" class="d-inline me-2">
+                                <input type="hidden" name="userId" value="@Model.Id" />
+                                <button type="submit" class="btn btn-outline-warning">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope-arrow-up me-2" viewBox="0 0 16 16">
+                                        <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4.5a.5.5 0 0 1-1 0V5.383l-7 4.2-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h5.5a.5.5 0 0 1 0 1H2a2 2 0 0 1-2-2zm1 7.105 4.708-2.897L1 5.383zM1 4v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1" />
+                                        <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.354-5.354 1.25 1.25a.5.5 0 0 1-.708.708L13 12.207V14a.5.5 0 0 1-1 0v-1.717l-.28.305a.5.5 0 0 1-.737-.676l1.149-1.25a.5.5 0 0 1 .722-.016" />
+                                    </svg>Resend Verification Email
+                                </button>
+                            </form>
+                        }
+                        <a class="btn btn-outline-info" href="mailto:@Model.Email" id="sendEmailBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope me-2" viewBox="0 0 16 16">
+                                <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1zm13 2.383-4.708 2.825L15 11.105zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741M1 11.105l4.708-2.897L1 5.383z" />
+                            </svg>Send Email
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Manage Role Confirmation Modal -->
+<div class="modal fade" id="manageRoleModal" tabindex="-1"
+     aria-labelledby="manageRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="manageRoleModalLabel">
+                    Confirm Role Change
+                </h5>
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="alert alert-warning d-flex align-items-center" role="alert">
+                    <i class="bi bi-shield-exclamation me-2 fs-5"></i>
+                    <div>
+                        <strong>Warning:</strong> Changing user roles affects permissions immediately.
+                    </div>
+                </div>
+
+                <p>
+                    Are you sure you want to change the role for
+                    <strong>@Model.FullName</strong>?
+                </p>
+
+                <p class="text-muted small">
+                    This action will update the user's access level across the system.
+                </p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+                <a class="btn btn-outline-primary"
+                    asp-controller="User"
+                   asp-action="ManageRoles"
+                   asp-route-id="@Model.Id">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shield-lock" viewBox="0 0 16 16">
+                        <path d="M5.338 1.59a61 61 0 0 0-2.837.856.48.48 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.7 10.7 0 0 0 2.287 2.233c.346.244.652.42.893.533q.18.085.293.118a1 1 0 0 0 .101.025 1 1 0 0 0 .1-.025q.114-.034.294-.118c.24-.113.547-.29.893-.533a10.7 10.7 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.8 11.8 0 0 1-2.517 2.453 7 7 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7 7 0 0 1-1.048-.625 11.8 11.8 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 63 63 0 0 1 5.072.56" />
+                        <path d="M9.5 6.5a1.5 1.5 0 0 1-1 1.415l.385 1.99a.5.5 0 0 1-.491.595h-.788a.5.5 0 0 1-.49-.595l.384-1.99a1.5 1.5 0 1 1 2-1.415" />
+                    </svg> Manage Roles
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning" role="alert" id="deleteWarningAlert">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-exclamation-triangle-fill me-2" viewBox="0 0 16 16">
+                        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2" />
+                    </svg>
+                    <strong>Warning:</strong> This action cannot be undone.
+                </div>
+                <p id="deleteConfirmationText">
+                    Are you sure you want to delete the user <strong>@Model.FullName</strong>?
+                    This will permanently remove all user data from the system.
+                </p>
+                <p class="text-muted small" id="deleteNote">
+                    Note: The user will no longer be able to access their account.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelDeleteBtn">Cancel</button>
+                <form asp-controller="User" asp-action="Delete" asp-route-id="@Model.Id" method="post" id="deleteUserForm">
+                    <button type="submit" class="btn btn-danger" id="confirmDeleteBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash me-2" viewBox="0 0 16 16">
+                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1z" />
+                        </svg>Delete User
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Initialize modals
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            var manageRoleModal = new bootstrap.Modal(document.getElementById('manageRoleModal'));
+
+            // Copy user ID to clipboard
+            document.getElementById('userIdValue')?.addEventListener('click', function() {
+                navigator.clipboard.writeText(this.textContent)
+                    .then(() => {
+                        const originalText = this.textContent;
+                        this.textContent = 'Copied!';
+                        setTimeout(() => {
+                            this.textContent = originalText;
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                    });
+            });
+
+           
+        });
+        });
+    </script>
+
+    <style>
+        /* Card styling */
+        .card {
+            border: 1px solid #e9ecef;
+        }
+
+        .card-header {
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        /* Avatar styling */
+        .rounded-circle {
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        /* Badge styling */
+        .badge {
+            font-size: 0.875em;
+        }
+
+            /* Role badge specific styles */
+            .badge.bg-danger {
+                background-color: #dc3545 !important;
+            }
+
+            .badge.bg-warning {
+                background-color: #ffc107 !important;
+                color: #000 !important;
+            }
+
+            .badge.bg-info {
+                background-color: #0dcaf0 !important;
+            }
+
+            .badge.bg-secondary {
+                background-color: #6c757d !important;
+            }
+
+        /* List group styling */
+        .list-group-item {
+            border-left: none;
+            border-right: none;
+        }
+
+            .list-group-item:first-child {
+                border-top: none;
+            }
+
+            .list-group-item:last-child {
+                border-bottom: none;
+            }
+
+        /* Hover effects */
+        #userIdValue:hover {
+            cursor: pointer;
+            background-color: #f8f9fa;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        /* Button spacing */
+        .btn-group .btn {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        /* Responsive adjustments */
+        @@media (max-width: 768px) {
+            #userAvatarSection {
+                margin-bottom: 2rem;
+            }
+
+            .btn-group {
+                width: 100%;
+                margin-top: 1rem;
+            }
+
+                .btn-group .btn {
+                    flex: 1;
+                }
+        }
+
+        /* Focus styles for accessibility */
+        a:focus, button:focus, input:focus, select:focus {
+            outline: 2px solid #0d6efd;
+            outline-offset: 2px;
+        }
+
+        /* Modal styling */
+        .modal-header {
+            background-color: #f8f9fa;
+        }
+
+        /* Quick actions button styling */
+        #quickActionsList .btn {
+            text-align: left;
+            padding: 0.75rem 1rem;
+        }
+
+        /* Breadcrumb styling */
+        .breadcrumb {
+            background-color: transparent;
+            padding-left: 0;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+}
+
+@functions {
+    // Helper function to get role badge color (same as in list page)
+    string GetRoleBadgeClass(string role)
+    {
+        return role.ToLower() switch
+        {
+            "admin" => "bg-danger",
+            "superadmin" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}

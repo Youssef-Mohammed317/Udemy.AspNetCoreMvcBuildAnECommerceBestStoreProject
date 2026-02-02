@@ -1,0 +1,608 @@
+﻿@using BestStore.Web.Models.ViewModels.User
+@model ManageRolesViewModel
+
+@{
+    ViewData["Title"] = "Manage User Roles";
+}
+
+<div class="container">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb" id="breadcrumbNav">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-controller="User" asp-action="Index" id="backToUsersLink">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left me-1" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
+                            </svg>Users
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-controller="User" asp-action="Details" asp-route-id="@Model.Id" id="backToDetailsLink">@Model.FullName</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page" id="currentPageBreadcrumb">Manage Roles</li>
+                </ol>
+            </nav>
+            <h2 class="mb-0" id="pageTitle">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-shield-lock me-2" viewBox="0 0 16 16">
+                    <path d="M5.338 1.59a61 61 0 0 0-2.837.856.48.48 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.7 10.7 0 0 0 2.287 2.233c.346.244.652.42.893.533q.18.085.293.118a1 1 0 0 0 .101.025 1 1 0 0 0 .1-.025q.114-.034.294-.118c.24-.113.547-.29.893-.533a10.7 10.7 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.8 11.8 0 0 1-2.517 2.453 7 7 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7 7 0 0 1-1.048-.625 11.8 11.8 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 63 63 0 0 1 5.072.56" />
+                    <path d="M9.5 6.5a1.5 1.5 0 0 1-1 1.415l.385 1.99a.5.5 0 0 1-.491.595h-.788a.5.5 0 0 1-.49-.595l.384-1.99a1.5 1.5 0 1 1 2-1.415" />
+                </svg>Manage User Roles
+            </h2>
+        </div>
+        <a class="btn btn-outline-secondary" asp-controller="User" asp-action="Details" asp-route-id="@Model.Id" id="backToDetailsBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle me-2" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
+            </svg>Cancel
+        </a>
+    </div>
+
+    <!-- User Summary -->
+    <div class="card shadow-sm mb-4" id="userSummaryCard">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3"
+                             style="width: 60px; height: 60px; font-size: 24px;"
+                             id="userAvatar">
+                            @(
+                            (!string.IsNullOrEmpty(Model.FirstName) ? Model.FirstName[0].ToString() : "") +
+                            (!string.IsNullOrEmpty(Model.LastName) ? Model.LastName[0].ToString() : "")
+                            )
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-1" id="userFullName">@Model.FullName</h5>
+                            <p class="card-text text-muted mb-0" id="userEmail">@Model.Email</p>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <span class="badge @(Model.EmailConfirmed ? "bg-success" : "bg-warning")">
+                            @(Model.EmailConfirmed ? "Email Confirmed" : "Email Not Confirmed")
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted d-block">Phone</small>
+                            <p class="mb-2">@(string.IsNullOrEmpty(Model.PhoneNumber) ? "Not provided" : Model.PhoneNumber)</p>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block">Created</small>
+                            <p class="mb-2">@Model.CreatedAt</p>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block">Address</small>
+                            <p class="mb-0">@(string.IsNullOrEmpty(Model.Address) ? "Not provided" : Model.Address)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Current Roles -->
+            <div class="card shadow-sm mb-4" id="currentRolesCard">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0" id="currentRolesTitle">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-shield-check me-2" viewBox="0 0 16 16">
+                            <path d="M5.338 1.59a61 61 0 0 0-2.837.856.48.48 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.7 10.7 0 0 0 2.287 2.233c.346.244.652.42.893.533q.18.085.293.118a1 1 0 0 0 .101.025 1 1 0 0 0 .1-.025q.114-.034.294-.118c.24-.113.547-.29.893-.533a10.7 10.7 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.8 11.8 0 0 1-2.517 2.453 7 7 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7 7 0 0 1-1.048-.625 11.8 11.8 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 63 63 0 0 1 5.072.56" />
+                            <path d="M10.854 5.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0" />
+                        </svg>Current Roles (@(Model.Roles?.Count ?? 0))
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Roles != null && Model.Roles.Any())
+                    {
+                        <div class="d-flex flex-wrap gap-2 mb-4" id="currentRolesList">
+                            @foreach (var role in Model.Roles)
+                            {
+                                <div class="d-flex align-items-center gap-2 border rounded p-2 bg-light" id="roleItem-@role">
+                                    <span class="badge @GetRoleBadgeClass(role) fs-6" id="roleBadge-@role">
+                                        @role
+                                    </span>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRole('@role')" id="removeRoleBtn-@role">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-3" id="noRolesMessage">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-shield-slash text-muted mb-2" viewBox="0 0 16 16">
+                                <path d="M10.412 11.528A5 5 0 0 0 5.096 6.32l.7-1.43a6 6 0 0 1 6.792 7.98zm.362.354.026-.02a7 7 0 0 0-9.791-8.241l-.824-1.43a8 8 0 0 1 11.082 9.454zm-9.536.138a.5.5 0 0 1 .11.672L2.808 8.76l1.149 1.99a.5.5 0 1 1-.861.51L1.697 9.21 1.04 10.44a.5.5 0 0 1-.672.11L.146 10.177a.5.5 0 0 1-.11-.672l1.658-2.877L0 5.354l.5-.5 2.5 2.5.5.5z" />
+                                <path d="m14.975 6.721-1.428-2.257a8 8 0 0 0-9.755 2.563.5.5 0 1 0 .844.537 7 7 0 0 1 8.356-2.143l1.195 1.886a.5.5 0 1 0 .788-.612M4.5 6.5A.5.5 0 0 0 4 7v1.5H2.5a.5.5 0 0 0 0 1H4v1.5a.5.5 0 0 0 1 0V10h1.5a.5.5 0 0 0 0-1H5V7a.5.5 0 0 0-.5-.5" />
+                            </svg>
+                            <p class="text-muted mb-0">No roles assigned to this user.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Available Roles -->
+            <div class="card shadow-sm" id="availableRolesCard">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0" id="availableRolesTitle">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-plus-circle me-2" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                        </svg>Available Roles
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="manageRolesForm" method="post" asp-controller="User" asp-action="ManageRoles" asp-route-id="@Model.Id">
+                        @if (Model.SystemRolesPairs != null && Model.SystemRolesPairs.Any())
+                        {
+                            <div class="mb-3" id="systemRolesSection">
+                                <p class="text-muted mb-3">Select roles to assign to this user:</p>
+                                <div class="d-flex flex-wrap gap-3" id="availableRolesList">
+                                    @foreach (var rolePair in Model.SystemRolesPairs)
+                                    {
+                                        var isSelected = Model.Roles?.Contains(rolePair.RoleName) == true;
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input role-checkbox" 
+                                                   type="checkbox" 
+                                                   id="role-@rolePair.Id" 
+                                                   value="@rolePair.RoleName"
+                                                   @(isSelected ? "checked" : "") 
+                                                   onchange="updateSelectedRoles()">
+                                            <label class="form-check-label" for="role-@rolePair.Id">
+                                                <span class="badge @GetRoleBadgeClass(rolePair.RoleName)">@rolePair.RoleName</span>
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                                <small class="text-muted mt-2 d-block">Note: Users should typically have only one main role.</small>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning" role="alert">
+                                No system roles available.
+                            </div>
+                        }
+
+                        <!-- Hidden fields for selected roles -->
+                        <input type="hidden" id="selectedRolesInput" name="SelectedRoles" value="@string.Join(",", Model.Roles ?? new List<string>())" />
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4" id="formActions">
+                            <a class="btn btn-outline-secondary me-md-2" asp-controller="User" asp-action="Details" asp-route-id="@Model.Id" id="cancelBtn">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary" id="saveRolesBtn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save me-2" viewBox="0 0 16 16">
+                                    <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1z" />
+                                </svg>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Role Information -->
+        <div class="col-lg-4">
+            <!-- Role Information Card -->
+            <div class="card shadow-sm mb-4" id="roleInfoCard">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0" id="roleInfoTitle">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-info-circle me-2" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
+                        </svg>Role Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.SystemRolesPairs != null && Model.SystemRolesPairs.Any())
+                    {
+                        <div class="accordion" id="roleAccordion">
+                            @foreach (var rolePair in Model.SystemRolesPairs)
+                            {
+                                <div class="accordion-item" id="accordionItem-@rolePair.Id">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@rolePair.Id" aria-expanded="false" aria-controls="collapse-@rolePair.Id">
+                                            <span class="badge @GetRoleBadgeClass(rolePair.RoleName) me-2">@rolePair.RoleName</span>
+                                            @rolePair.RoleName
+                                        </button>
+                                    </h2>
+                                    <div id="collapse-@rolePair.Id" class="accordion-collapse collapse" data-bs-parent="#roleAccordion">
+                                        <div class="accordion-body">
+                                            @if (rolePair.RoleName.Equals("SuperAdmin", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                <p><strong>Full system access:</strong></p>
+                                                <ul class="mb-0">
+                                                    <li>Manage all users and roles</li>
+                                                    <li>Access all system settings</li>
+                                                    <li>View and manage all data</li>
+                                                    <li>System configuration</li>
+                                                    <li>Full administrative privileges</li>
+                                                </ul>
+                                            }
+                                            else if (rolePair.RoleName.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                <p><strong>Full system access:</strong></p>
+                                                <ul class="mb-0">
+                                                    <li>Manage customer users and roles</li>
+                                                    <li>Access all system settings</li>
+                                                    <li>View and manage all data</li>
+                                                    <li>System configuration</li>
+                                                    <li>Full administrative privileges</li>
+                                                </ul>
+                                            }
+                                            else if (rolePair.RoleName.Equals("Customer", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                <p><strong>Customer access:</strong></p>
+                                                <ul class="mb-0">
+                                                    <li>Place orders and make purchases</li>
+                                                    <li>View order history and tracking</li>
+                                                    <li>Manage personal information</li>
+                                                    <li>Contact customer support</li>
+                                                    <li>Write reviews and ratings</li>
+                                                </ul>
+                                            }
+                                            else
+                                            {
+                                                <p><strong>@rolePair.RoleName role:</strong></p>
+                                                <ul class="mb-0">
+                                                    <li>Custom role permissions</li>
+                                                    <li>Access determined by system configuration</li>
+                                                </ul>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-info-circle text-muted mb-2" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
+                            </svg>
+                            <p class="text-muted mb-0">No role information available.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Current Permissions Summary -->
+            <div class="card shadow-sm" id="permissionsSummaryCard">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0" id="permissionsSummaryTitle">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-list-check me-2" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3.854 2.146a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0l-.5-.5a.5.5 0 1 1 .708-.708L2 3.293l1.146-1.147a.5.5 0 0 1 .708 0m0 4a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0l-.5-.5a.5.5 0 1 1 .708-.708L2 7.293l1.146-1.147a.5.5 0 0 1 .708 0m0 4a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0l-.5-.5a.5.5 0 0 1 .708-.708l.146.147 1.146-1.147a.5.5 0 0 1 .708 0" />
+                        </svg>Current Permissions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @{
+                        var permissions = new List<string>();
+                        if (Model.Roles?.Contains("SuperAdmin", StringComparer.OrdinalIgnoreCase) == true)
+                        {
+                            permissions.AddRange(new[]
+                            {
+                                "Full System Access",
+                                "User Management",
+                                "System Settings",
+                                "All Data Access",
+                                "Role Management",
+                                "Configuration Access",
+                                "Audit Logs",
+                                "Database Management",
+                                "Server Settings"
+                                });
+                        }
+
+                        if (Model.Roles?.Contains("Admin", StringComparer.OrdinalIgnoreCase) == true)
+                        {
+                            permissions.AddRange(new[] { 
+                                "Full System Access", 
+                                "User Management", 
+                                "System Settings", 
+                                "All Data Access",
+                                "Role Management",
+                                "Configuration Access"
+                            });
+                        }
+                        
+                        if (Model.Roles?.Contains("Customer", StringComparer.OrdinalIgnoreCase) == true)
+                        {
+                            permissions.AddRange(new[] { 
+                                "Place Orders", 
+                                "View Order History", 
+                                "Manage Personal Info",
+                                "Contact Support",
+                                "Write Reviews"
+                            });
+                        }
+                        
+                        // Handle any other roles (shouldn't exist but just in case)
+                        if (Model.Roles != null)
+                        {
+                            foreach (var role in Model.Roles)
+                            {
+                                if (!new[] { "admin", "customer","superadmin" }.Contains(role.ToLower()))
+                                {
+                                    permissions.Add($"{role} Access");
+                                }
+                            }
+                        }
+
+                        permissions = permissions.Distinct().ToList();
+                    }
+
+                    @if (permissions.Any())
+                    {
+                        <ul class="list-group list-group-flush" id="permissionsList">
+                            @foreach (var permission in permissions)
+                            {
+                                <li class="list-group-item px-0 py-2" id="permissionItem-@permission">
+                                    <div class="d-flex align-items-center">
+                                        <div class="text-success me-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">
+                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                                                <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05" />
+                                            </svg>
+                                        </div>
+                                        <span>@permission</span>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0 text-center py-2" id="noPermissionsMessage">No permissions granted.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Update current roles display based on checkboxes
+            updateCurrentRolesDisplay();
+        });
+
+        // Update selected roles hidden input based on checkbox selections
+        function updateSelectedRoles() {
+            var checkboxes = document.querySelectorAll('.role-checkbox:checked');
+            var selectedRoles = Array.from(checkboxes).map(cb => cb.value);
+            document.getElementById('selectedRolesInput').value = selectedRoles.join(',');
+            
+            // Update the current roles display
+            updateCurrentRolesDisplay();
+        }
+
+        // Update the current roles display based on selected checkboxes
+        function updateCurrentRolesDisplay() {
+            var currentRolesList = document.getElementById('currentRolesList');
+            var selectedRoles = getSelectedRoles();
+            
+            // Clear current display
+            currentRolesList.innerHTML = '';
+            
+            if (selectedRoles.length > 0) {
+                selectedRoles.forEach(function(role) {
+                    var roleItem = document.createElement('div');
+                    roleItem.className = 'd-flex align-items-center gap-2 border rounded p-2 bg-light';
+                    roleItem.id = 'roleItem-' + role;
+                    
+                    roleItem.innerHTML = `
+                        <span class="badge ${getRoleBadgeClass(role)} fs-6">${role}</span>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRole('${role}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                            </svg>
+                        </button>
+                    `;
+                    
+                    currentRolesList.appendChild(roleItem);
+                });
+            } else {
+                // Show no roles message
+                currentRolesList.innerHTML = `
+                    <div class="text-center py-3" id="noRolesMessage">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-shield-slash text-muted mb-2" viewBox="0 0 16 16">
+                            <path d="M10.412 11.528A5 5 0 0 0 5.096 6.32l.7-1.43a6 6 0 0 1 6.792 7.98zm.362.354.026-.02a7 7 0 0 0-9.791-8.241l-.824-1.43a8 8 0 0 1 11.082 9.454zm-9.536.138a.5.5 0 0 1 .11.672L2.808 8.76l1.149 1.99a.5.5 0 1 1-.861.51L1.697 9.21 1.04 10.44a.5.5 0 0 1-.672.11L.146 10.177a.5.5 0 0 1-.11-.672l1.658-2.877L0 5.354l.5-.5 2.5 2.5.5.5z"/>
+                            <path d="m14.975 6.721-1.428-2.257a8 8 0 0 0-9.755 2.563.5.5 0 1 0 .844.537 7 7 0 0 1 8.356-2.143l1.195 1.886a.5.5 0 1 0 .788-.612M4.5 6.5A.5.5 0 0 0 4 7v1.5H2.5a.5.5 0 0 0 0 1H4v1.5a.5.5 0 0 0 1 0V10h1.5a.5.5 0 0 0 0-1H5V7a.5.5 0 0 0-.5-.5"/>
+                        </svg>
+                        <p class="text-muted mb-0">No roles assigned to this user.</p>
+                    </div>
+                `;
+            }
+            
+            // Update permissions summary
+            updatePermissionsSummary(selectedRoles);
+        }
+
+        // Remove a role by unchecking the checkbox
+        function removeRole(role) {
+            var checkbox = document.querySelector(`.role-checkbox[value="${role}"]`);
+            if (checkbox) {
+                checkbox.checked = false;
+                updateSelectedRoles();
+            }
+        }
+
+        // Get selected roles from hidden input
+        function getSelectedRoles() {
+            var rolesInput = document.getElementById('selectedRolesInput');
+            return rolesInput.value ? rolesInput.value.split(',') : [];
+        }
+
+        // Get badge class for role
+        function getRoleBadgeClass(role) {
+            var roleLower = role.toLowerCase();
+            switch (roleLower) {
+                case 'admin': return 'bg-danger';
+                case 'superadmin': return 'bg-danger';
+                case 'customer': return 'bg-success';
+                default: return 'bg-primary';
+            }
+        }
+
+        // Update permissions summary
+        function updatePermissionsSummary(selectedRoles) {
+            // In a real application, you would make an API call here
+            // For now, we'll just log the update
+            console.log('Selected roles updated:', selectedRoles);
+        }
+
+        // Form submission validation
+        document.getElementById('manageRolesForm').addEventListener('submit', function(e) {
+            var selectedRoles = getSelectedRoles();
+            if (selectedRoles.length === 0) {
+                if (!confirm('No roles selected. The user will have no permissions. Continue?')) {
+                    e.preventDefault();
+                }
+            }
+            
+            // Optional: Validate that Admin and Customer aren't both selected if that's a business rule
+            var hasAdmin = selectedRoles.some(r => r.toLowerCase() === 'admin');
+            var hasCustomer = selectedRoles.some(r => r.toLowerCase() === 'customer');
+            
+            if (hasAdmin && hasCustomer) {
+                if (!confirm('Typically, users should not have both Admin and Customer roles. Continue anyway?')) {
+                    e.preventDefault();
+                }
+            }
+        });
+    </script>
+
+    <style>
+        /* Role badge specific styles */
+        .badge.bg-danger {
+            background-color: #dc3545 !important;
+        }
+
+        .badge.bg-success {
+            background-color: #198754 !important;
+        }
+
+        .badge.bg-primary {
+            background-color: #0d6efd !important;
+        }
+
+        /* Role item styling */
+        #currentRolesList .border {
+            transition: all 0.2s ease;
+        }
+
+            #currentRolesList .border:hover {
+                box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+            }
+
+        /* Checkbox styling */
+        .form-check-input:checked {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        .form-check-input:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        /* Accordion styling */
+        .accordion-button:not(.collapsed) {
+            background-color: rgba(13, 110, 253, 0.05);
+            color: #0d6efd;
+        }
+
+        /* Permissions list */
+        .list-group-item {
+            border-left: none;
+            border-right: none;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        /* Card styling */
+        .card {
+            border: 1px solid #e9ecef;
+        }
+
+        .card-header {
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        /* User summary card styling */
+        #userSummaryCard .rounded-circle {
+            background: linear-gradient(135deg, #0d6efd, #6610f2);
+        }
+
+        /* Animation for role addition/removal */
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #currentRolesList > div {
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Responsive adjustments */
+        @@media (max-width: 768px) {
+            #availableRolesList .form-check {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        /* Focus styles for accessibility */
+        a:focus, button:focus, input:focus, select:focus {
+            outline: 2px solid #0d6efd;
+            outline-offset: 2px;
+        }
+
+        /* Form validation styling */
+        .alert-warning {
+            background-color: #fff3cd;
+            border-color: #ffc107;
+            color: #664d03;
+        }
+    </style>
+}
+
+@functions {
+    // Helper function to get role badge color
+    string GetRoleBadgeClass(string role)
+    {
+        return role.ToLower() switch
+        {
+            "superadmin" => "bg-danger",
+            "admin" => "bg-danger",
+            "customer" => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+}

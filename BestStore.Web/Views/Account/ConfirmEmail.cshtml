@@ -1,0 +1,171 @@
+﻿@{
+    ViewData["Title"] = "Email Confirmation";
+    var successMessage = TempData["SuccessMessage"] as string;
+    var errorMessage = TempData["ErrorMessage"] as string;
+}
+
+<div class="container" style="max-width: 500px; margin: 100px auto;">
+    <div class="card" style="border: 1px solid #dee2e6; border-radius: 8px;">
+        <div class="card-body p-5 text-center">
+
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <!-- Success State -->
+                <div class="mb-4">
+                    <i class="bi bi-check-circle" style="font-size: 64px; color: #28a745;"></i>
+                </div>
+
+                <h2 style="font-weight: 600; color: #333; margin-bottom: 15px;">Email Confirmed!</h2>
+
+                <p style="color: #6c757d; margin-bottom: 30px; line-height: 1.6;">
+                    <i class="bi bi-check-lg me-2"></i> @successMessage
+                </p>
+
+                <div style="margin-bottom: 25px;">
+                    <p style="color: #6c757d; font-size: 14px; margin-bottom: 5px;">
+                        You can now log in to your account.
+                    </p>
+                </div>
+
+                <!-- Login Button (Primary) -->
+                <a asp-controller="Account" asp-action="Login"
+                   class="btn btn-primary w-100 mb-3"
+                   style="padding: 12px; border-radius: 6px; font-weight: 500;">
+                    <i class="bi bi-box-arrow-in-right me-2"></i> Go to Login
+                </a>
+
+                <!-- Home Button -->
+                <a asp-controller="Home" asp-action="Index"
+                   class="btn btn-outline-secondary w-100"
+                   style="padding: 12px; border-radius: 6px; font-weight: 500;">
+                    <i class="bi bi-house-door me-2"></i> Back to Home
+                </a>
+            }
+            else if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <!-- Error State -->
+                <div class="mb-4">
+                    <i class="bi bi-x-circle" style="font-size: 64px; color: #dc3545;"></i>
+                </div>
+
+                <h2 style="font-weight: 600; color: #333; margin-bottom: 15px;">Confirmation Failed</h2>
+
+                <p style="color: #6c757d; margin-bottom: 25px; line-height: 1.6;">
+                    <i class="bi bi-exclamation-triangle me-2"></i> @errorMessage
+                </p>
+
+                <div class="alert alert-light" style="margin-bottom: 25px; font-size: 14px;">
+                    <i class="bi bi-info-circle me-2"></i>
+                    The link may have expired or is invalid.
+                </div>
+
+                <!-- Home Button (Primary) -->
+                <a asp-controller="Home" asp-action="Index"
+                   class="btn btn-primary w-100 mb-3"
+                   style="padding: 12px; border-radius: 6px; font-weight: 500;">
+                    <i class="bi bi-house-door me-2"></i> Go to Homepage
+                </a>
+
+                <!-- Resend Button -->
+                <a asp-controller="Account" asp-action="EmailConfirmation"
+                   class="btn btn-outline-secondary w-100"
+                   style="padding: 12px; border-radius: 6px; font-weight: 500;">
+                    <i class="bi bi-envelope me-2"></i> Request New Confirmation
+                </a>
+            }
+            else
+            {
+                <!-- Loading/Default State -->
+                <div class="mb-4">
+                    <div class="spinner-border text-primary" style="width: 64px; height: 64px;" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+
+                <h2 style="font-weight: 600; color: #333; margin-bottom: 15px;">Confirming Email...</h2>
+
+                <p style="color: #6c757d; margin-bottom: 25px; line-height: 1.6;">
+                    Please wait while we confirm your email address.
+                </p>
+
+                <!-- Home Button Only -->
+                <a asp-controller="Home" asp-action="Index"
+                   class="btn btn-outline-secondary w-100"
+                   style="padding: 12px; border-radius: 6px; font-weight: 500;">
+                    <i class="bi bi-house-door me-2"></i> Back to Home
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        transition: all 0.2s ease;
+    }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+            transform: translateY(-1px);
+        }
+
+    .btn-outline-secondary:hover {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .card {
+        transition: transform 0.2s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+    .bi-check-circle {
+        animation: bounce 1s ease;
+    }
+
+    .bi-x-circle {
+        animation: shake 0.5s ease;
+    }
+
+    @@keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    @@keyframes shake {
+        0%, 100% {
+            transform: translateX(0);
+        }
+
+        25% {
+            transform: translateX(-5px);
+        }
+
+        75% {
+            transform: translateX(5px);
+        }
+    }
+</style>
+
+<!-- Auto-redirect for success after 3 seconds -->
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                window.location.href = '@Url.Action("Login", "Account")';
+            }, 3000); // Redirect to login after 3 seconds
+        });
+    </script>
+}
