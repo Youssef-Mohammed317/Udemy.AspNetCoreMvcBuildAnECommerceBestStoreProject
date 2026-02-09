@@ -47,8 +47,7 @@
 								<i class="bi bi-receipt me-1"></i> Orders
 							</a>
 						</li>
-					}
-					else if (User.IsInRole("Customer"))
+					} else if (User.IsInRole("Customer"))
 					{
 						<!-- Customer-only links -->
 						<li class="nav-item position-relative">
@@ -65,7 +64,7 @@
 									<!-- Badge -->
 									<span id="CartSize"
 										  class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger">
-										@(CartHelper.GetCartSize(Context.Request,Context.Response))
+										@(CartHelper.GetCartSize(Context.Request, Context.Response))
 									</span>
 								</span>
 								Cart
@@ -80,6 +79,34 @@
 							</a>
 						</li>
 					}
+					
+
+
+				}
+				else
+				{
+					<li class="nav-item position-relative">
+						<a class="nav-link text-dark px-3 py-2 rounded-1"
+						   asp-area=""
+						   asp-controller="Cart"
+						   asp-action="Index">
+
+							<span class="position-relative py-2">
+
+								<i class="bi bi-cart"></i>
+
+
+								<!-- Badge -->
+								<span id="CartSize"
+									  class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger">
+									@(CartHelper.GetCartSize(Context.Request, Context.Response))
+								</span>
+							</span>
+							Cart
+
+						</a>
+
+					</li>
 				}
 			</ul>
 

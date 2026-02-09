@@ -2,10 +2,6 @@
 using BestStore.Shared.Result;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BestStore.Infrastructure.Utility
 {
@@ -42,6 +38,7 @@ namespace BestStore.Infrastructure.Utility
 
         public Result DeleteImage(string imagePath)
         {
+            
             return Delete(imagePath);
         }
 

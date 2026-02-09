@@ -1,5 +1,4 @@
 ﻿using BestStore.Shared.Entities.Base;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BestStore.Shared.Entities
 {

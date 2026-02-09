@@ -1,12 +1,9 @@
-﻿using Azure.Core;
-using BestStore.Application.DTOs.Account;
+﻿using BestStore.Application.DTOs.Account;
 using BestStore.Application.Interfaces.Services;
 using BestStore.Shared.Entities;
 using BestStore.Shared.Result;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace BestStore.Infrastructure.Identity.Services
@@ -225,7 +222,7 @@ namespace BestStore.Infrastructure.Identity.Services
 
         public async Task<Result<UpdateProfileDto>> GetCurrentUserProfileAsync()
         {
-            if (_currentUser.UserId == null)
+            if (_currentUser?.UserId == null)
             {
                 return Result<UpdateProfileDto>.Failure(Error.Failure("NotFound", "User not found."));
             }
@@ -253,12 +250,12 @@ namespace BestStore.Infrastructure.Identity.Services
 
         public async Task<Result<UpdateProfileDto>> UpdateUserProfileAsync(UpdateProfileDto dto)
         {
-            if (_currentUser.UserId == null)
+            if (_currentUser?.UserId == null)
             {
                 return Result<UpdateProfileDto>.Failure(Error.Failure("NotFound", "User not found."));
             }
 
-            var user = await _userManager.FindByIdAsync(_currentUser.UserId);
+            var user = await _userManager.FindByIdAsync(_currentUser?.UserId ?? "");
             if (user == null)
             {
                 return Result<UpdateProfileDto>.Failure(Error.Failure("NotFound", "User not found."));
@@ -277,7 +274,10 @@ namespace BestStore.Infrastructure.Identity.Services
             user.FirstName = dto.FirstName;
             user.LastName = dto.LastName;
             user.PhoneNumber = dto.PhoneNumber;
-            user.EmailConfirmed = dto.EmailConfirmed;
+            if (dto.Email != user.Email)
+            {
+                user.EmailConfirmed = false;
+            }
             user.Address = dto.Address;
             user.Email = dto.Email;
 

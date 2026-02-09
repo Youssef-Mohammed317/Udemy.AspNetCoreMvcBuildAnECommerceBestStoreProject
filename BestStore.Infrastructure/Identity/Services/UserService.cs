@@ -1,16 +1,11 @@
-﻿using BestStore.Application.DTOs.Product;
-using BestStore.Application.DTOs.User;
+﻿using BestStore.Application.DTOs.User;
 using BestStore.Application.Interfaces.Services;
 using BestStore.Shared.Entities;
 using BestStore.Shared.Result;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
-using System.Net;
-using System.Text;
 
 namespace BestStore.Infrastructure.Identity.Services
 {
@@ -27,10 +22,11 @@ namespace BestStore.Infrastructure.Identity.Services
         {
             this._userManager = userManager;
             this._roleManager = roleManager;
-            _currentUser = _userManager.FindByIdAsync(currentUserService.UserId!).GetAwaiter().GetResult()!;
-            _isSuperAdmin = _userManager.IsInRoleAsync(_currentUser, "SuperAdmin").GetAwaiter().GetResult();
+            _currentUser = _userManager.FindByIdAsync(currentUserService?.UserId!).GetAwaiter().GetResult()!;
+            if (_currentUser != null)
+                _isSuperAdmin = _userManager.IsInRoleAsync(_currentUser, "SuperAdmin").GetAwaiter().GetResult();
         }
-       
+
         public async Task<Result<PaginatedResult<UserDto>>> GetAllUsersAsync(
                 string search = null,
                 string sortBy = nameof(ApplicationUser.CreatedAt),
@@ -111,9 +107,8 @@ namespace BestStore.Infrastructure.Identity.Services
                 {
                     var roles = await GetUserRolesAsync(user);
 
-                    if (!_isSuperAdmin && (roles.Contains("SuperAdmin") || roles.Contains("Admin")) && (user.Id != _currentUser.Id))
+                    if (!_isSuperAdmin && (roles.Contains("SuperAdmin") || roles.Contains("Admin")) && (user.Id != _currentUser?.Id))
                     {
-
 
                         continue;
 
@@ -221,7 +216,7 @@ namespace BestStore.Infrastructure.Identity.Services
 
             var roles = await GetUserRolesAsync(user);
 
-            if (!_isSuperAdmin && roles.Contains("Admin") && (user.Id != _currentUser.Id))
+            if (!_isSuperAdmin && roles.Contains("Admin") && (user.Id != _currentUser?.Id))
             {
                 return Result.Failure(Error.Failure("AccessDenied", "This Action Can't Done by admin role"));
             }

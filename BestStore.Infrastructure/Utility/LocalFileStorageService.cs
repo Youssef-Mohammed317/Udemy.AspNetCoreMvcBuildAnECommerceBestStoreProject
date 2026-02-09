@@ -2,9 +2,6 @@
 using BestStore.Shared.Result;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace BestStore.Infrastructure.Utility
 {
@@ -55,6 +52,7 @@ namespace BestStore.Infrastructure.Utility
                 filePath.TrimStart('/')
             );
 
+                fullPath = fullPath.Replace("/", "\\");
             if (File.Exists(fullPath))
             {
                 File.Delete(fullPath);
@@ -77,6 +75,7 @@ namespace BestStore.Infrastructure.Utility
             if (folders != null)
             {
                 foreach (var folder in folders)
+
                     path = Path.Combine(path, folder);
             }
 

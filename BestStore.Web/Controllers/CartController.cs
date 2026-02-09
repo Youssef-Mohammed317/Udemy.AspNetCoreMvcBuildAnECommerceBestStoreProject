@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
 using BestStore.Application.DTOs.Cart;
-using BestStore.Application.DTOs.Order;
 using BestStore.Application.Interfaces.Services;
-using BestStore.Shared.Result;
 using BestStore.Web.Helpers;
 using BestStore.Web.Models.ViewModels.Cart;
 using Microsoft.AspNetCore.Authorization;
@@ -27,6 +25,7 @@ namespace BestStore.Web.Controllers
             this._shippingFee = configuration.GetValue<decimal>("CartSettings:ShippingFee");
             this._mapper = mapper;
         }
+        [Authorize]
         public async Task<IActionResult> Index()
         {
             var cartItems = await CartHelper.GetCartItemsAsync(Request, Response, _productService, _mapper);
@@ -75,10 +74,10 @@ namespace BestStore.Web.Controllers
 
             if (cartView.CheckoutViewModel.PaymentMethod.Contains("paypal") || cartView.CheckoutViewModel.PaymentMethod.Contains("credit_card"))
             {
-                return   RedirectToAction("Index", "Checkout");
+                return RedirectToAction("Index", "Checkout");
             }
 
-                return RedirectToAction("Confirm");
+            return RedirectToAction("Confirm");
         }
         [Authorize]
         public IActionResult Confirm()

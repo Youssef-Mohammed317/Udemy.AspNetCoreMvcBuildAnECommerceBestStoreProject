@@ -6,10 +6,7 @@ using BestStore.Application.Interfaces.Utility;
 using BestStore.Shared.Entities;
 using BestStore.Shared.Result;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Text;
 
 namespace BestStore.Application.Services
 {
@@ -148,10 +145,12 @@ namespace BestStore.Application.Services
         public async Task<Result> DeleteProductAsync(int id)
         {
             var productResult = await _unitOfWork.ProductRepository.GetByIdAsync(id, include: x => x.Include(x => x.Category));
+
             if (productResult.IsFailure)
             {
                 return Result.Failure(productResult.Error);
             }
+
             var product = productResult.Value;
 
             var removeResult = _imageStorageService.DeleteImage(product.ImageUrl);

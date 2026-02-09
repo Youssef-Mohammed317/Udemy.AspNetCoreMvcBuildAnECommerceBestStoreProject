@@ -1,9 +1,6 @@
 ﻿using BestStore.Shared.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BestStore.Infrastructure.Contexts.Seeds
 {
@@ -23,6 +20,7 @@ namespace BestStore.Infrastructure.Contexts.Seeds
                     LastName = "Admin",
                     UserName = superAdminEmail,
                     Email = superAdminEmail,
+                    Address = superAdminEmail,
                     EmailConfirmed = true,
                     CreatedAt = DateTime.UtcNow,
                     LastUpdatedAt = DateTime.UtcNow,
@@ -42,6 +40,7 @@ namespace BestStore.Infrastructure.Contexts.Seeds
                     LastName = "Admin",
                     UserName = adminEmail,
                     Email = adminEmail,
+                    Address = adminEmail,
                     EmailConfirmed = true,
                     CreatedAt = DateTime.UtcNow,
                     LastUpdatedAt = DateTime.UtcNow,
@@ -61,6 +60,7 @@ namespace BestStore.Infrastructure.Contexts.Seeds
                     LastName = "Customer",
                     UserName = customerEmail,
                     Email = customerEmail,
+                    Address = customerEmail,
                     EmailConfirmed = true,
                     CreatedAt = DateTime.UtcNow,
                     LastUpdatedAt = DateTime.UtcNow,

@@ -11,9 +11,9 @@ namespace BestStore.Infrastructure.Configrations
 
             builder.Property(p => p.UnitPrice).HasPrecision(16, 2);
             builder.HasOne(oi => oi.Product)
-         .WithMany()
-         .HasForeignKey(oi => oi.ProductId)
-         .OnDelete(DeleteBehavior.Restrict);
+                 .WithMany()
+                 .HasForeignKey(oi => oi.ProductId)
+                 .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

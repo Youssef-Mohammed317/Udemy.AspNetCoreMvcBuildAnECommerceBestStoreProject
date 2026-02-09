@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using BestStore.Application.DTOs.Account;
 using BestStore.Application.Interfaces.Services;
-using BestStore.Shared.Entities;
 using BestStore.Web.Models.ViewModels.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -328,6 +327,8 @@ namespace BestStore.Web.Controllers
         public async Task<IActionResult> Logout()
         {
             await _accountService.LogoutAsync();
+            // delete the shopping cart cookie
+            Response.Cookies.Delete("shopping_cart");
             return RedirectToAction("Index", "Home");
         }
 
